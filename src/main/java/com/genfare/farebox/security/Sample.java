@@ -32,9 +32,8 @@ public class Sample {
 	//---------------------------------------------------------------	
 		
 		
-		MultivaluedMap head = new MultivaluedHashMap();
+		MultivaluedMap<String, Object> head = new MultivaluedHashMap<String,Object>(); 
 		 for (Map.Entry<String, String> header : headers.entrySet()) {
-				//conn.setRequestProperty(header.getKey(), header.getValue());
 				head.add(header.getKey(), header.getValue());
 			}
 		javax.ws.rs.client.Client client = ClientBuilder.newClient(); 
@@ -44,15 +43,15 @@ public class Sample {
 		   ObjectMapper mapper2 = new ObjectMapper();
 			try {
 				deviceAuthResponse = mapper2.readValue(responseAsString, DeviceAuthResponse.class);
-			} catch (JsonParseException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (JsonMappingException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (JsonParseException e) {
+				log.warning("Error parsing device response: " + e.getMessage());
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				 log.warning("Error mapping device response: " + e.getMessage());
+				e.printStackTrace();
+			} catch (IOException e) {
+				log.warning("Error reading device response: " + e.getMessage());
+				e.printStackTrace();
 			}
         
 		
