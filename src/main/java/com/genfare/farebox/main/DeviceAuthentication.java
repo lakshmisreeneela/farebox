@@ -50,7 +50,7 @@ public class DeviceAuthentication {
 			tenant = prop.getProperty("tenant");
 			deviceType = prop.getProperty("deviceType");
 			environment = prop.getProperty("environment");
-			environment="local";
+			//environment="local";
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}

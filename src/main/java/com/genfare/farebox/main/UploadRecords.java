@@ -101,10 +101,10 @@ public class UploadRecords {
 		usageRecordType.setTerminalNumber(property.getProperty("fareBoxSerialNumber"));
 		usageRecordType.setTimestamp(new DateType());
 		usageRecordType.setTerminalType(property.getProperty("deviceType"));
-		usageRecordType.setDesignator(29);
-		usageRecordType.setRouteId(1);
-		usageRecordType.setGroup((byte) 2);
-		usageRecordType.setOperatorId(141);
+		usageRecordType.setDesignator(Integer.parseInt(property.getProperty("Designator")));
+		usageRecordType.setRouteId(Integer.parseInt(property.getProperty("RouteId")));
+		usageRecordType.setGroup((byte) Integer.parseInt(property.getProperty("Group")));
+		usageRecordType.setOperatorId(Integer.parseInt(property.getProperty("OperatorId")));
 		usageRecordType.setAmountCharged(new BigDecimal(0.00));
 		usageRecordType.setAmountRemaining(new BigDecimal(0.00));
 		
@@ -121,12 +121,9 @@ public class UploadRecords {
 		usageRecordType.setFareset(Integer.parseInt(property.getProperty("fareset")));
 		usageRecordType.setTTP(62);
 		
-		
 		usageRecordType.setDateOfUsage(dateType);
 		usageRecordType.setTimestamp(dateType);
 		
-		
-		usageRecordType.setSequenceNumber(new BigInteger(1200+""));
 		BigInteger sum = BigInteger.valueOf(0);
 		sum = sum.add(BigInteger.valueOf(Long.parseLong(property.getProperty("sequencenumber"))));
 		usageRecordType.setSequenceNumber(sum);
