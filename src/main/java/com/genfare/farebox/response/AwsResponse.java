@@ -1,4 +1,4 @@
-package com.genfare.farebox.main;
+package com.genfare.farebox.response;
 
 public class AwsResponse {
 	private String environment;

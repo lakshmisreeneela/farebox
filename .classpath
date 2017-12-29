@@ -25,7 +25,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="E:/lakshmi/mysql-connector-java-5.1.45/mysql-connector-java-5.1.45-bin.jar"/>
 	<classpathentry kind="lib" path="E:/lakshmi/brandingpart/genfarecloud/osgi/device-service/target/device-service-10.01.1.jar"/>
-	<classpathentry kind="lib" path="E:/lakshmi/brandingpart/genfarecloud/osgi/device-schemas/target/device-schemas-10.01.3.jar"/>
 	<classpathentry kind="lib" path="E:/lakshmi/brandingpart/genfarecloud/osgi/device-schemas/target/device-schemas-10.01.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

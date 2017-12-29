@@ -1,4 +1,4 @@
-package com.genfare.farebox.main;
+package com.genfare.farebox.response;
 
 import java.util.HashMap;
 import java.util.Map;

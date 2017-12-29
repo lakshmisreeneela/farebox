@@ -1,9 +1,9 @@
 package com.genfare.farebox.main;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
-import javax.xml.datatype.DatatypeConfigurationException;
+
+import com.genfare.farebox.response.DeviceAuthResponse;
 
 public class FareBox {
 
@@ -15,15 +15,12 @@ public class FareBox {
 		DeviceAuthResponse deviceAuthResponse = authentication.authenticate();
 		if (deviceAuthResponse != null) {
 			UploadRecords uploadRecords = new UploadRecords();
-			try {
+			
 				uploadRecords.uploadRecords(deviceAuthResponse);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (DatatypeConfigurationException e) {
-				e.printStackTrace();
-			}
+			
 		}
 
 	}
-
 }
+
+

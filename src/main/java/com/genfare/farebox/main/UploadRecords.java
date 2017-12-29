@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Logger;
@@ -31,7 +30,8 @@ import com.genfare.cloud.device.header.DeviceHeaderType;
 import com.genfare.cloud.device.record.DeviceEventAPI;
 import com.genfare.cloud.device.record.RecordsType;
 import com.genfare.cloud.device.record.UsageRecordType;
-import com.genfare.farebox.main.AwsResponse.AwsCredentials;
+import com.genfare.farebox.response.AwsResponse.AwsCredentials;
+import com.genfare.farebox.response.DeviceAuthResponse;
 
 @SuppressWarnings("restriction")
 public class UploadRecords {
@@ -44,43 +44,46 @@ public class UploadRecords {
 	Properties property = new Properties();
 	
 	
-		public void uploadRecords(DeviceAuthResponse deviceAuthResponse) throws IOException, DatatypeConfigurationException {
+	public void uploadRecords(DeviceAuthResponse deviceAuthResponse) {
 
-			
-			
 		AwsCredentials awsCredentials = deviceAuthResponse.getAws().getCredentials();
 		String accessKey = awsCredentials.getAccessKey();
 		String secretKey = awsCredentials.getSecretKey();
 		String sessionId = awsCredentials.getSessionId();
-		byte[] authorizationBytes = (accessKey + " | " + secretKey +" | "+sessionId).getBytes();
+		byte[] authorizationBytes = (accessKey + " | " + secretKey + " | " + sessionId).getBytes();
 		String awsAuthorizationKey = new String(Base64.encodeBase64(authorizationBytes));
-		
 		try {
 			String filename = "device.properties";
 			input = FareBox.class.getClassLoader().getResourceAsStream(filename);
 			if (input == null) {
-				// log.info("Sorry, unable to find " + filename);
+				log.info("Sorry, unable to find " + filename);
 			} else {
 				property.load(input);
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
-		
+
 		String uploadUrlString = property.getProperty("uploadUrlString");
+
+		DeviceEventAPI deviceEventAPI = getDeviceEventObject(property);
+		String xml = makeXml(deviceEventAPI);
+		post(uploadUrlString, awsAuthorizationKey, xml);
+
+	}
+
+
+	
+	private DeviceEventAPI getDeviceEventObject(Properties property2) {
+		
 		DeviceEventAPI deviceEventAPI = new DeviceEventAPI();
 		DeviceHeaderType deviceHeaderType = new DeviceHeaderType();
-		DateType dateType =  new DateType();
+		DateType dateType = new DateType();
 		dateType.setLocalTime(false);
-		
-		XMLGregorianCalendar xmlgcal = getXMLGregorianCalendar(property.getProperty("dateofusage"));
 
-		
-//		GregorianCalendar gcal = new GregorianCalendar();
-//	      XMLGregorianCalendar xmlgcal = DatatypeFactory.newInstance()
-//	            .newXMLGregorianCalendar(gcal);
+		XMLGregorianCalendar xmlgcal = getXMLGregorianCalendar(property.getProperty("dateofusage"));
 		dateType.setValue(xmlgcal);
-		
+
 		deviceHeaderType.setTenantName(property.getProperty("tenant"));
 		deviceHeaderType.setEnvironment(property.getProperty("environment"));
 		deviceHeaderType.setDeviceType(property.getProperty("deviceType"));
@@ -93,9 +96,9 @@ public class UploadRecords {
 		deviceHeaderType.setLocation(property.getProperty("Location"));
 		deviceHeaderType.setMessageId(property.getProperty("MessageId"));
 		deviceHeaderType.setCorrelationId(property.getProperty("CorrelationId"));
-		
+
 		deviceEventAPI.setHeader(deviceHeaderType);
-		
+
 		ArrayList<UsageRecordType> usageRecordTypes = new ArrayList<UsageRecordType>();
 		UsageRecordType usageRecordType = new UsageRecordType();
 		usageRecordType.setTerminalNumber(property.getProperty("fareBoxSerialNumber"));
@@ -107,11 +110,11 @@ public class UploadRecords {
 		usageRecordType.setOperatorId(Integer.parseInt(property.getProperty("OperatorId")));
 		usageRecordType.setAmountCharged(new BigDecimal(0.00));
 		usageRecordType.setAmountRemaining(new BigDecimal(0.00));
-		
+
 		Scanner sc = new Scanner(System.in);
 		System.out.println("please enter card number");
 		String electronicId = sc.nextLine();
-		
+
 		usageRecordType.setElectronicId(electronicId);
 		usageRecordType.setPendingCount(0);
 		usageRecordType.setPayGoType(1);
@@ -120,10 +123,10 @@ public class UploadRecords {
 		usageRecordType.setPaymenttype("STORED_VALUE");
 		usageRecordType.setFareset(Integer.parseInt(property.getProperty("fareset")));
 		usageRecordType.setTTP(62);
-		
+
 		usageRecordType.setDateOfUsage(dateType);
 		usageRecordType.setTimestamp(dateType);
-		
+
 		BigInteger sum = BigInteger.valueOf(0);
 		sum = sum.add(BigInteger.valueOf(Long.parseLong(property.getProperty("sequencenumber"))));
 		usageRecordType.setSequenceNumber(sum);
@@ -131,16 +134,56 @@ public class UploadRecords {
 		deviceEventAPI.setRecords(new RecordsType());
 		deviceEventAPI.getRecords().setUsages(new RecordsType.Usages());
 		deviceEventAPI.getRecords().getUsages().getUsage().add(usageRecordType);
-		
-		String xml = makeXml(deviceEventAPI);
-		post(uploadUrlString,awsAuthorizationKey,xml);
-		
-}
+		return deviceEventAPI;
 
+	}
 
+	
+	
+	
+	public static XMLGregorianCalendar getXMLGregorianCalendar(String dateofusage) {
+		DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		Date date = null;
+		try {
+			date = format.parse(dateofusage);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(date);
+
+		try {
+			return DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+		} catch (DatatypeConfigurationException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	
+	
+	private String makeXml(DeviceEventAPI deviceEventAPI) {
+		JAXBContext jaxbContext;
+		StringWriter sw = null;
+		try {
+			jaxbContext = JAXBContext.newInstance(DeviceEventAPI.class);
+
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+			sw = new StringWriter();
+			jaxbMarshaller.marshal(deviceEventAPI, sw);
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+		System.out.println(sw);
+		return sw.toString();
+
+	}
+	
+	
+	
 	private String post(String uploadUrlString, String awsAuthorizationKey, String xml) {
 		HttpURLConnection con = null;
-		//uploadUrlString ="https://cdta-intg.gfcp.io/services/device/authenticated/v2/event";
 		String responseMessage = "";
 		try {
 			URL url = new URL(uploadUrlString);
@@ -169,6 +212,16 @@ public class UploadRecords {
 			int responseCode = conn.getResponseCode();
 			responseMessage = conn.getResponseMessage();
 			log.info("Response Code: " + responseCode + ", Message: " + responseMessage);
+
+			if (responseCode == 200) {
+				log.info("Rider activity completed successfully");
+				System.out.println("Rider activity completed successfully");
+			}
+
+			else
+			{
+				log.info("sorry, unable to process");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 
@@ -180,47 +233,6 @@ public class UploadRecords {
 		}
 		return responseMessage;
 	}
-
-	
-	
-	private String makeXml(DeviceEventAPI deviceEventAPI) {
-		JAXBContext jaxbContext;
-		StringWriter sw = null;
-		try {
-			jaxbContext = JAXBContext.newInstance(DeviceEventAPI.class);
-
-			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-			sw = new StringWriter();
-			jaxbMarshaller.marshal(deviceEventAPI, sw);
-		} catch (JAXBException e) {
-			e.printStackTrace();
-		}
-		System.out.println(sw);
-		return sw.toString();
-
-	}
-	
-	
-	public static XMLGregorianCalendar getXMLGregorianCalendar(String dateofusage){
-		DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-		Date date = null;
-		try {
-			date = format.parse(dateofusage);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTime(date);
-
-		try {
-			return DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		} catch (DatatypeConfigurationException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
 
 	
 }

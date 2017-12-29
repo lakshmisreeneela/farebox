@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.genfare.farebox.response.DeviceAuthResponse;
 
 public class DeviceAuthentication {
 
