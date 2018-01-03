@@ -1,4 +1,4 @@
-package com.genfare.farebox.main;
+package com.genfare.farebox.clientrequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +17,7 @@ import com.genfare.farebox.response.DeviceAuthResponse;
 
 public class DeviceAuthentication {
 
-	private static final Logger log = Logger.getLogger(FareBox.class.getName());
+	private static final Logger log = Logger.getLogger(DeviceAuthentication.class.getName());
 
 	public static final String AUTH_HEADER_PROPERTY = "Authorization";
 	public static final String AUTH_HEADER_PREFIX = "Basic";
@@ -37,7 +37,7 @@ public class DeviceAuthentication {
 	public DeviceAuthResponse authenticate() {
 		try {
 			String filename = "device.properties";
-			input = FareBox.class.getClassLoader().getResourceAsStream(filename);
+			input = DeviceAuthentication.class.getClassLoader().getResourceAsStream(filename);
 			if (input == null) {
 				log.info("Sorry, unable to find " + filename);
 

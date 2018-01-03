@@ -1,4 +1,4 @@
-package com.genfare.farebox.main;
+package com.genfare.farebox.clientrequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +54,7 @@ public class UploadRecords {
 		String awsAuthorizationKey = new String(Base64.encodeBase64(authorizationBytes));
 		try {
 			String filename = "device.properties";
-			input = FareBox.class.getClassLoader().getResourceAsStream(filename);
+			input = UploadRecords.class.getClassLoader().getResourceAsStream(filename);
 			if (input == null) {
 				log.info("Sorry, unable to find " + filename);
 			} else {

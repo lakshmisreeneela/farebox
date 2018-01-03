@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 public class DeviceEventAPIXMLConverter {
+	@SuppressWarnings("restriction")
 	private String makeXml(DeviceEventAPI deviceEventAPI) {
 		JAXBContext jaxbContext;
 		StringWriter sw = null;
