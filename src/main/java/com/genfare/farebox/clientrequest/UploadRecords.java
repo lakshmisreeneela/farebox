@@ -24,14 +24,15 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.genfare.apache.impl.Base64;
+import org.jboss.resteasy.util.Base64;
+
 import com.genfare.cloud.device.common.DateType;
 import com.genfare.cloud.device.header.DeviceHeaderType;
 import com.genfare.cloud.device.record.DeviceEventAPI;
 import com.genfare.cloud.device.record.RecordsType;
 import com.genfare.cloud.device.record.UsageRecordType;
-import com.genfare.farebox.response.AwsResponse.AwsCredentials;
-import com.genfare.farebox.response.DeviceAuthResponse;
+import com.genfare.cloud.osgi.device.auth.response.AwsResponse.AwsCredentials;
+import com.genfare.cloud.osgi.device.auth.response.DeviceAuthResponse;
 
 @SuppressWarnings("restriction")
 public class UploadRecords {
@@ -44,14 +45,14 @@ public class UploadRecords {
 	Properties property = new Properties();
 	
 	
-	public void uploadRecords(DeviceAuthResponse deviceAuthResponse) {
+	public String uploadRecords(DeviceAuthResponse deviceAuthResponse) {
 
 		AwsCredentials awsCredentials = deviceAuthResponse.getAws().getCredentials();
 		String accessKey = awsCredentials.getAccessKey();
 		String secretKey = awsCredentials.getSecretKey();
 		String sessionId = awsCredentials.getSessionId();
 		byte[] authorizationBytes = (accessKey + " | " + secretKey + " | " + sessionId).getBytes();
-		String awsAuthorizationKey = new String(Base64.encodeBase64(authorizationBytes));
+		String awsAuthorizationKey = new String(Base64.encodeBytes(authorizationBytes));
 		try {
 			String filename = "device.properties";
 			input = UploadRecords.class.getClassLoader().getResourceAsStream(filename);
@@ -68,7 +69,7 @@ public class UploadRecords {
 
 		DeviceEventAPI deviceEventAPI = getDeviceEventObject(property);
 		String xml = makeXml(deviceEventAPI);
-		post(uploadUrlString, awsAuthorizationKey, xml);
+		return post(uploadUrlString, awsAuthorizationKey, xml);
 
 	}
 

@@ -27,8 +27,9 @@ public class WalletDetails {
 		JSONObject json = null;
 		PropertiesRetrieve PropertiesRetrieve = new PropertiesRetrieve();
 		Properties prop = PropertiesRetrieve.getProperties();
-		String auth_username = prop.getProperty("auth_username");
-		String auth_password = prop.getProperty("auth_password");
+		
+		String auth_username = prop.getProperty("auth_username_i");
+		String auth_password = prop.getProperty("auth_password_i");
 		
 		byte[] authorizationBytes = (auth_username + ":" +auth_password ).getBytes();
 		String authorizationHeader = AUTH_HEADER_PREFIX + " " + new String(Base64.encodeBase64(authorizationBytes));
@@ -51,7 +52,10 @@ public class WalletDetails {
 		String responseAsString = response.readEntity(String.class);
 		System.out.println(responseAsString);
 		 try {
+			 if(response.getStatus() == 200)
+			 {
 			 json = new JSONObject(responseAsString);
+			 }
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -61,11 +65,16 @@ public class WalletDetails {
 	
 
 	
-	public void getWalletDetails(String responseAsString,String username) {
+	public String getWalletDetails(String access_token,String token_type,String username) {
 	Scanner sc = new Scanner(System.in);
 	String uploadUrl = "https://cdta-dev3.gfcp.io/services/data-api/mobile/wallets/for/"+username+"?tenant=CDTA";
+	MultivaluedMap<String, Object> head = new MultivaluedHashMap<String, Object>();
+	head.add(AUTH_HEADER_PROPERTY,token_type+" "+access_token);
+	
 		Client client = ClientBuilder.newClient();
 		Response response = client.target(uploadUrl).request().get();
+		String responseAsString = response.readEntity(String.class);
+		return responseAsString;
 	}
 
 

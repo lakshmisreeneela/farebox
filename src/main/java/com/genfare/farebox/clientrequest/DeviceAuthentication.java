@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.genfare.farebox.response.DeviceAuthResponse;
+import com.genfare.cloud.osgi.device.auth.response.DeviceAuthResponse;
 
 public class DeviceAuthentication {
 
@@ -34,7 +34,7 @@ public class DeviceAuthentication {
 	InputStream input = null;
 	String environment = null;
 
-	public DeviceAuthResponse authenticate() {
+	public DeviceAuthResponse authenticate(String fareBoxSerialNumber,String fareBoxPassword) {
 		try {
 			String filename = "device.properties";
 			input = DeviceAuthentication.class.getClassLoader().getResourceAsStream(filename);
@@ -45,21 +45,17 @@ public class DeviceAuthentication {
 			prop.load(input);
 
 			authenticationUrl = prop.getProperty("authenticationUrl");
-			//authenticationUrl="cdta-intg.gfcp.io/services/device/v5/auth";
 			fareBoxSerialNumber = prop.getProperty("fareBoxSerialNumber");
 			fareBoxPassword = prop.getProperty("fareBoxPassword");
 			tenant = prop.getProperty("tenant");
 			deviceType = prop.getProperty("deviceType");
 			environment = prop.getProperty("environment");
-			//environment="local";
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
 		String authUrlString = "https://";
 		environment = environment.trim();
-		//if (environment.equals("local")) {
-		//authUrlString = "http://";
-		//}
+
 		DeviceAuthResponse deviceAuthResponse = null;
 
 		authUrlString = authUrlString + authenticationUrl + "?tenant=" + tenant + "&type=" + deviceType;
@@ -83,7 +79,6 @@ public class DeviceAuthentication {
 			} else {
 				ObjectMapper mapper2 = new ObjectMapper();
 				deviceAuthResponse = mapper2.readValue(responseAsString, DeviceAuthResponse.class);
-				//encodeAWSCredentials(deviceAuthResponse);
 				log.info("Successfully authenticated...");
 			}
 		}
@@ -98,5 +93,4 @@ public class DeviceAuthentication {
 		return deviceAuthResponse;
 	}
 
-	
 }
