@@ -45,8 +45,6 @@ public class DeviceAuthentication {
 			prop.load(input);
 
 			authenticationUrl = prop.getProperty("authenticationUrl");
-			fareBoxSerialNumber = prop.getProperty("fareBoxSerialNumber");
-			fareBoxPassword = prop.getProperty("fareBoxPassword");
 			tenant = prop.getProperty("tenant");
 			deviceType = prop.getProperty("deviceType");
 			environment = prop.getProperty("environment");

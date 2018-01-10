@@ -33,8 +33,8 @@ import com.genfare.cloud.device.record.RecordsType;
 import com.genfare.cloud.device.record.UsageRecordType;
 import com.genfare.cloud.osgi.device.auth.response.AwsResponse.AwsCredentials;
 import com.genfare.cloud.osgi.device.auth.response.DeviceAuthResponse;
+import com.genfare.farebox.main.EnvironmentSetting;
 
-@SuppressWarnings("restriction")
 public class UploadRecords {
 
 	
@@ -45,7 +45,7 @@ public class UploadRecords {
 	Properties property = new Properties();
 	
 	
-	public String uploadRecords(DeviceAuthResponse deviceAuthResponse) {
+	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String electronicId, String sequenceNumber) {
 
 		AwsCredentials awsCredentials = deviceAuthResponse.getAws().getCredentials();
 		String accessKey = awsCredentials.getAccessKey();
@@ -67,7 +67,7 @@ public class UploadRecords {
 
 		String uploadUrlString = property.getProperty("uploadUrlString");
 
-		DeviceEventAPI deviceEventAPI = getDeviceEventObject(property);
+		DeviceEventAPI deviceEventAPI = getDeviceEventObject(property,electronicId,sequenceNumber);
 		String xml = makeXml(deviceEventAPI);
 		return post(uploadUrlString, awsAuthorizationKey, xml);
 
@@ -75,7 +75,7 @@ public class UploadRecords {
 
 
 	
-	private DeviceEventAPI getDeviceEventObject(Properties property2) {
+	private DeviceEventAPI getDeviceEventObject(Properties property2,String electronicId,String sequenceNumber) {
 		
 		DeviceEventAPI deviceEventAPI = new DeviceEventAPI();
 		DeviceHeaderType deviceHeaderType = new DeviceHeaderType();
@@ -89,7 +89,7 @@ public class UploadRecords {
 		deviceHeaderType.setEnvironment(property.getProperty("environment"));
 		deviceHeaderType.setDeviceType(property.getProperty("deviceType"));
 		deviceHeaderType.setOrganization(property.getProperty("organizationName"));
-		deviceHeaderType.setSourceId(property.getProperty("fareBoxSerialNumber"));
+		deviceHeaderType.setSourceId(EnvironmentSetting.getFbSerialNumber());
 		deviceHeaderType.setAction("UPDATE");
 		deviceHeaderType.setTestMode(true);
 		deviceHeaderType.setRetryNumber(0);
@@ -102,7 +102,7 @@ public class UploadRecords {
 
 		ArrayList<UsageRecordType> usageRecordTypes = new ArrayList<UsageRecordType>();
 		UsageRecordType usageRecordType = new UsageRecordType();
-		usageRecordType.setTerminalNumber(property.getProperty("fareBoxSerialNumber"));
+		usageRecordType.setTerminalNumber(EnvironmentSetting.getFbSerialNumber());
 		usageRecordType.setTimestamp(new DateType());
 		usageRecordType.setTerminalType(property.getProperty("deviceType"));
 		usageRecordType.setDesignator(Integer.parseInt(property.getProperty("Designator")));
@@ -111,10 +111,6 @@ public class UploadRecords {
 		usageRecordType.setOperatorId(Integer.parseInt(property.getProperty("OperatorId")));
 		usageRecordType.setAmountCharged(new BigDecimal(0.00));
 		usageRecordType.setAmountRemaining(new BigDecimal(0.00));
-
-		Scanner sc = new Scanner(System.in);
-		System.out.println("please enter card number");
-		String electronicId = sc.nextLine();
 
 		usageRecordType.setElectronicId(electronicId);
 		usageRecordType.setPendingCount(0);
@@ -129,7 +125,7 @@ public class UploadRecords {
 		usageRecordType.setTimestamp(dateType);
 
 		BigInteger sum = BigInteger.valueOf(0);
-		sum = sum.add(BigInteger.valueOf(Long.parseLong(property.getProperty("sequencenumber"))));
+		sum = sum.add(BigInteger.valueOf(Long.parseLong(sequenceNumber)));
 		usageRecordType.setSequenceNumber(sum);
 		usageRecordTypes.add(usageRecordType);
 		deviceEventAPI.setRecords(new RecordsType());

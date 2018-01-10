@@ -13,7 +13,7 @@ public class DeviceAuth {
 		DeviceAuthResponse deviceAuthResponse = deviceAuthentication.authenticate(fareBoxSerialNumber, fareBoxPassword);
 		if(deviceAuthResponse != null)
 		{
-			EnvironmentSetting.setEnvironment(fareBoxSerialNumber);
+			EnvironmentSetting.setFbSerialNumber(fareBoxSerialNumber);
 			EnvironmentSetting.setFbPassword(fareBoxPassword);
 			return "authentication successfull";
 		}
