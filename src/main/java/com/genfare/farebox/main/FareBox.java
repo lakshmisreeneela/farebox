@@ -12,7 +12,7 @@ import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
 import com.genfare.cloud.osgi.device.auth.response.DeviceAuthResponse;
 import com.genfare.farebox.clientrequest.DeviceAuthentication;
-import com.genfare.farebox.clientrequest.UploadRecords;
+import com.genfare.farebox.clientrequest.RiderShip;
 import com.genfare.farebox.clientrequest.WalletDetails;
 
 public class FareBox {
@@ -41,7 +41,8 @@ public class FareBox {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("please enter Username");
 		String username = sc.nextLine();
-		JSONObject response = WalletDetails.userLogin(username);
+		String password = "dfdfg";
+		JSONObject response = walletDetails.userLogin(username,password);
 		if(response != null)
 		{			try {
 				walletDetails.getWalletDetails(response.getString("access_token"),response.getString("token_type"),username);

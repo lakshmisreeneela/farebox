@@ -12,10 +12,10 @@ public class PropertiesRetrieve {
 	static Properties prop = new Properties();
 
 	public Properties getProperties() {
-
+		InputStream input = null;
 		try {
 			String filename = "device.properties";
-			InputStream input = DeviceAuthentication.class.getClassLoader().getResourceAsStream(filename);
+			 input = DeviceAuthentication.class.getClassLoader().getResourceAsStream(filename);
 			if (input == null) {
 				log.info("Sorry, unable to find " + filename);
 
@@ -25,6 +25,7 @@ public class PropertiesRetrieve {
 
 			ex.printStackTrace();
 		}
+	
 		return prop;
 	}
 }

@@ -14,6 +14,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.genfare.cloud.osgi.device.auth.response.DeviceAuthResponse;
+import com.genfare.farebox.util.PropertiesRetrieve;
 
 public class DeviceAuthentication {
 
@@ -35,6 +36,7 @@ public class DeviceAuthentication {
 	String environment = null;
 
 	public DeviceAuthResponse authenticate(String fareBoxSerialNumber,String fareBoxPassword) {
+		
 		try {
 			String filename = "device.properties";
 			input = DeviceAuthentication.class.getClassLoader().getResourceAsStream(filename);
@@ -43,6 +45,10 @@ public class DeviceAuthentication {
 
 			}
 			prop.load(input);
+			
+			
+			PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
+			Properties prop = propertiesRetrieve.getProperties();
 
 			authenticationUrl = prop.getProperty("authenticationUrl");
 			tenant = prop.getProperty("tenant");
@@ -61,7 +67,7 @@ public class DeviceAuthentication {
 
 		String authorizationHeader = AUTH_HEADER_PREFIX + " " + new String(Base64.encodeBase64(authorizationBytes));
 
-		log.info(authorizationHeader);
+		System.out.println(authorizationHeader);
 		javax.ws.rs.client.Client client = ClientBuilder.newClient();
 		try {
 			MultivaluedMap<String, Object> head = new MultivaluedHashMap<String, Object>();
@@ -77,7 +83,7 @@ public class DeviceAuthentication {
 			} else {
 				ObjectMapper mapper2 = new ObjectMapper();
 				deviceAuthResponse = mapper2.readValue(responseAsString, DeviceAuthResponse.class);
-				log.info("Successfully authenticated...");
+				System.out.println("Successfully authenticated...");
 			}
 		}
 
