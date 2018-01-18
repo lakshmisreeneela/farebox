@@ -42,13 +42,13 @@ public class FareBox {
 		System.out.println("please enter Username");
 		String username = sc.nextLine();
 		String password = "dfdfg";
-		JSONObject response = walletDetails.userLogin(username,password);
-		if(response != null)
-		{			try {
-				walletDetails.getWalletDetails(response.getString("access_token"),response.getString("token_type"),username);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+		//JSONObject response = walletDetails.userLogin(username,password);
+		//if(response != null)
+		//{			try {
+		//		walletDetails.getWalletDetails(response.getString("access_token"),response.getString("token_type"),username);
+			//} catch (JSONException e) {
+			//	e.printStackTrace();
+			//}
 		}
 		
 	
@@ -64,6 +64,6 @@ public class FareBox {
 //		}
 
 	}
-}
+
 
 

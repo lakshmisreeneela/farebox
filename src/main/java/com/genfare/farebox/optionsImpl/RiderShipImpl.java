@@ -5,7 +5,7 @@ import com.genfare.farebox.clientrequest.DeviceAuthentication;
 import com.genfare.farebox.clientrequest.RiderShip;
 import com.genfare.farebox.main.EnvironmentSetting;
 
-public class RiderShipImpl {
+public class RiderShipImpl { 
 
 	public void riderShipProcess(String electronicId, String sequenceNumber) {
 		DeviceAuthentication deviceAuthentication = new DeviceAuthentication();

@@ -64,7 +64,7 @@ public class RiderShip {
 			ex.printStackTrace();
 		}
 
-		String uploadUrlString = property.getProperty("uploadUrlString");
+		String uploadUrlString = "https://"+EnvironmentSetting.getEnvironment()+"/services/device/authenticated/v2/event";
 
 		DeviceEventAPI deviceEventAPI = getDeviceEventObject(property,electronicId,sequenceNumber);
 		String xml = makeXml(deviceEventAPI);

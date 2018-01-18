@@ -14,6 +14,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.genfare.cloud.osgi.device.auth.response.DeviceAuthResponse;
+import com.genfare.farebox.main.EnvironmentSetting;
 import com.genfare.farebox.util.PropertiesRetrieve;
 
 public class DeviceAuthentication {
@@ -49,20 +50,15 @@ public class DeviceAuthentication {
 			
 			PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 			Properties prop = propertiesRetrieve.getProperties();
-
-			authenticationUrl = prop.getProperty("authenticationUrl");
 			tenant = prop.getProperty("tenant");
 			deviceType = prop.getProperty("deviceType");
-			environment = prop.getProperty("environment");
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
-		String authUrlString = "https://";
-		environment = environment.trim();
 
 		DeviceAuthResponse deviceAuthResponse = null;
 
-		authUrlString = authUrlString + authenticationUrl + "?tenant=" + tenant + "&type=" + deviceType;
+		String authUrlString = "https://" +EnvironmentSetting.getEnvironment()+"/services/device/v5/auth" + "?tenant=" + EnvironmentSetting.getTenant() + "&type=" + deviceType;
 		byte[] authorizationBytes = (fareBoxSerialNumber + ":" + fareBoxPassword).getBytes();
 
 		String authorizationHeader = AUTH_HEADER_PREFIX + " " + new String(Base64.encodeBase64(authorizationBytes));

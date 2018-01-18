@@ -48,7 +48,7 @@
          <artifactId>device-schemas</artifactId>
          <scope>system</scope>
          <version>10.01.1</version>
-         <systemPath>${basedir}\src\lib\device-schemas-10.01.1.jar</systemPath>
+         <systemPath>${basedir}/src/lib/device-schemas-10.01.1.jar</systemPath>
       </dependency>
 	
 	<dependency>
@@ -56,7 +56,7 @@
          <artifactId>device-service</artifactId>
          <scope>system</scope>
          <version>10.01.1</version>
-         <systemPath>${basedir}\src\lib\device-service-10.01.1.jar</systemPath>
+         <systemPath>${basedir}/src/lib/device-service-10.01.1.jar</systemPath>
       </dependency>
 	
 	
@@ -112,7 +112,7 @@
           <manifest>
             <addClasspath>true</addClasspath>
             <classpathPrefix>${project.basedir}/lib/</classpathPrefix>
-            <mainClass>com.genfare.farebox.cmdOptions.BasicOptions</mainClass>
+            <mainClass>com.genfare.farebox.main.BasicOptions</mainClass>
           </manifest>
         </archive>
       </configuration>
