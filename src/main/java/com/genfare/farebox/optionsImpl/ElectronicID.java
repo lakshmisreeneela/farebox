@@ -19,21 +19,21 @@ public void getElectronicId(String cardNumber)
 			String token_type = jSONObject.getString("token_type");
 			WalletElectronicId walletElectronicId = new WalletElectronicId();
 			jSONObject = walletElectronicId.getElectronicId(access_token, token_type, cardNumber);
-			
+			if(jSONObject != null)
+			{
 			JSONArray jSONArray =  jSONObject.getJSONArray("identifiers");
 			 for (int i = 0; i < jSONArray.length(); i++) {
 				 JSONObject jSONArray2 = jSONArray.getJSONObject(i);
 				 if(jSONArray2.get("type").equals("electronic_id"))
 				 {
 					 electronicid = jSONArray2.get("identifier");
+					 break;
 				 }
 			 }
-			//JSONObject jSONArray2 = jSONArray.getJSONObject(1);
-			//Object electronicid = jSONArray2.get("identifier");
-			 if(electronicid != null)
-			 {
 			System.out.println("Card Electronic_Id : "+electronicid);
 			 }
+			else
+				System.out.println("Invalid Card Number");
 			
 		} catch (JSONException e) {
 			e.printStackTrace();

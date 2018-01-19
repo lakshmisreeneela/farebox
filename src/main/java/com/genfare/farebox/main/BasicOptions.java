@@ -18,6 +18,7 @@ import com.genfare.farebox.optionsImpl.ElectronicID;
 import com.genfare.farebox.optionsImpl.RiderShipImpl;
 import com.genfare.farebox.optionsImpl.UserLoginOptImpl;
 import com.genfare.farebox.optionsImpl.WalletsOptImpl;
+import com.genfare.farebox.util.ListOptions;
 
 public class BasicOptions {
 	private static final Logger log = Logger.getLogger(BasicOptions.class.getName());
@@ -37,9 +38,9 @@ public class BasicOptions {
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("start ridership");
-		Option property2 = OptionBuilder.create("ridership");
+		Option property2 = OptionBuilder.create("tap");
 		options.addOption(property2);
-		options.addOption("help", false, "listing all options");
+		options.addOption("list","LIST", false, "listing all options");
 		options.addOption("devicelog", false, "listing Device configuration details");
 		options.addOption("environment", false, "listing Device configuration details");
 		options.addOption("exit", false, "exit from the farebox");
@@ -65,17 +66,23 @@ public class BasicOptions {
 		Option property5 = OptionBuilder.create("login");
 		options.addOption(property5);
 		
-		OptionBuilder.withArgName("electronic_id cardNumber");
+		OptionBuilder.withArgName("eid cardNumber");
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("start ridership");
 		Option property6 = OptionBuilder.create("get");
 		options.addOption(property6);
-		
+		System.out.println("Usage : <command> <option> <arguments..>");
+		System.out.println("example list");
 		for (;;) {
 			try {
 				System.out.println();
+				if(args.length==0)
 				System.out.printf("farebox>");
+				else
+				{
+					System.out.printf(args[0]+">");	
+				}
 				
 				BufferedReader inp = new BufferedReader(new InputStreamReader(System.in));
 
@@ -85,19 +92,21 @@ public class BasicOptions {
 					commands.add(args2);
 					args2 = "-" + args2;
 				} catch (IOException e) {
+					
 					e.printStackTrace();
 					continue;
 				}
 				String[] args3 = args2.split(" ");
 				CommandLine line = new BasicParser().parse(options, args3);
-				if (line.hasOption(args3[0])) {
-					getResponse(args3[0], line);
+				String command = args3[0].toLowerCase();
+				if (line.hasOption(command)) {
+					getResponse(command, line);
 				} else {
 					System.out.println("Command not found");
 				}
 
 			} catch (Exception ex) {
-				log.info(ex.getMessage());
+				System.out.println("Error:"+ex.getMessage());
 				continue;
 			}
 		}
@@ -109,8 +118,8 @@ public class BasicOptions {
 		String[] arguments;
 		DeviceAuthOptImpl deviceAuth;
 		switch (option) {
-		case "-help":
-			System.out.println("listing all options");
+		case "-list":ListOptions listOptions = new ListOptions();
+		listOptions.getListOfOptions();
 			break;
 		case "-authenticate":
 			deviceAuth = new DeviceAuthOptImpl();
@@ -147,7 +156,7 @@ public class BasicOptions {
 				}
 				else
 				{
-					System.out.println("must have two arguments Type and Value");
+					System.out.println("must have a option and one argument");
 				}
 			}
 			break;
@@ -175,8 +184,8 @@ public class BasicOptions {
 			}
 			break;
 
-		case "-ridership":
-			arguments = line.getOptionValues("ridership");
+		case "-tap":
+			arguments = line.getOptionValues("tap");
 			if (isValidate2(arguments)) {
 				RiderShipImpl riderShip = new RiderShipImpl();
 				riderShip.riderShipProcess(arguments[0], arguments[1]);
