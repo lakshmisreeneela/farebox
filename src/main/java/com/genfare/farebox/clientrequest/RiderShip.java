@@ -27,6 +27,7 @@ import org.jboss.resteasy.util.Base64;
 
 import com.genfare.cloud.device.common.DateType;
 import com.genfare.cloud.device.header.DeviceHeaderType;
+import com.genfare.cloud.device.record.AutoloadRecordType;
 import com.genfare.cloud.device.record.DeviceEventAPI;
 import com.genfare.cloud.device.record.RecordsType;
 import com.genfare.cloud.device.record.UsageRecordType;
@@ -84,10 +85,10 @@ public class RiderShip {
 		XMLGregorianCalendar xmlgcal = getXMLGregorianCalendar(property.getProperty("dateofusage"));
 		dateType.setValue(xmlgcal);
 
-		deviceHeaderType.setTenantName(property.getProperty("tenant"));
-		deviceHeaderType.setEnvironment(property.getProperty("environment"));
+		deviceHeaderType.setTenantName(property.getProperty(EnvironmentSetting.getTenant()));
+		deviceHeaderType.setEnvironment(property.getProperty(EnvironmentSetting.getEnv()));
 		deviceHeaderType.setDeviceType(property.getProperty("deviceType"));
-		deviceHeaderType.setOrganization(property.getProperty("organizationName"));
+		deviceHeaderType.setOrganization(property.getProperty(EnvironmentSetting.getTenant()));
 		deviceHeaderType.setSourceId(EnvironmentSetting.getFbSerialNumber());
 		deviceHeaderType.setAction("UPDATE");
 		deviceHeaderType.setTestMode(true);
@@ -122,7 +123,7 @@ public class RiderShip {
 
 		usageRecordType.setDateOfUsage(dateType);
 		usageRecordType.setTimestamp(dateType);
-
+		
 		BigInteger sum = BigInteger.valueOf(0);
 		sum = sum.add(BigInteger.valueOf(Long.parseLong(sequenceNumber)));
 		usageRecordType.setSequenceNumber(sum);

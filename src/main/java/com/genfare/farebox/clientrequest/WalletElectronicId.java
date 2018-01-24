@@ -1,15 +1,10 @@
 package com.genfare.farebox.clientrequest;
 
-import java.io.File;
-import java.io.StringReader;
-
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
 
 import com.amazonaws.util.json.JSONObject;
 import com.genfare.farebox.main.EnvironmentSetting;
@@ -36,8 +31,11 @@ public class WalletElectronicId {
 			Response response = client.target(uploadURL).request().headers(head).get();
 			if (response.getStatus() == 200) {
 				String responseAsString = response.readEntity(String.class);
-				
 				json = new JSONObject(responseAsString);
+//				if(json != null)
+//				{
+//					
+//				}
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();

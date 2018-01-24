@@ -15,7 +15,30 @@ public class ListOptions {
 	}
 	
 	
-	
+	public void getCommandDescription(String command)
+	{
+		switch(command)
+		{
+		case "authenticate":System.out.println("no need to provide any arguments simply use authenticate");
+		break;
+		case "environment":System.out.println("no need to provide any arguments simply use environment");
+		break;
+		case "auth":System.out.println("need to provide two arguments device serialNumber and Password");
+		System.out.println("syntax: "+"auth <DeviceSerialNumber> <DevicePassword>");
+		break;
+		case "set":System.out.println("syntax: "+"set env <Environment>");
+				   System.out.println("syntax: "+"set tenant <TenantName>");
+				   System.out.println("syntax: "+"set fbxSerialNumber <fbxSerialNumber>");
+		           System.out.println("syntax: "+"set fbxPassword <fbxPassword>");
+		break;
+		case "get":System.out.println("syntax: "+"get eid <cardNumber> (gives electronic_Id of the card)");
+		break;
+		case "tap":System.out.println("need to provide two arguments Electronic_id of the card and SequenceNumber");
+					System.out.println("syntax: "+"tap <cardElectronicId> <sequenceNumber>");
+		break;
+		
+		}
+	}
 	
 	
 	

@@ -58,6 +58,10 @@ public class DeviceAuthentication {
 
 		DeviceAuthResponse deviceAuthResponse = null;
 
+		
+		
+		
+		
 		String authUrlString = "https://" +EnvironmentSetting.getEnvironment()+"/services/device/v5/auth" + "?tenant=" + EnvironmentSetting.getTenant() + "&type=" + deviceType;
 		byte[] authorizationBytes = (fareBoxSerialNumber + ":" + fareBoxPassword).getBytes();
 

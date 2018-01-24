@@ -5,7 +5,9 @@ public class EnvironmentSetting {
 	private static String fbPassword = "eb817670-ce4e-4193-bbe0-26c465f8e27d" ;
 	private static String environment = "cdta-intg.gfcp.io";
 	private static String tenant = "CDTA";
-	 
+	private static String env = "intg";
+	
+	
 	
 	public static String getFbSerialNumber() {
 		return fbSerialNumber;
@@ -20,31 +22,22 @@ public class EnvironmentSetting {
 		EnvironmentSetting.fbPassword = fbPassword;
 	}
 	public static String getEnvironment() {
+		environment = tenant.toLowerCase()+"-"+env+".gfcp.io";
 		return environment;
 	}
 
-	public static void setEnvironment(String environment) {
-		if (environment != null && environment.length() > 10) {
-			environment = environment.trim();
-			int lastIndex = environment.indexOf('-');
-			if (lastIndex != -1) {
-				String tenant = environment.substring(0, lastIndex);
-				EnvironmentSetting.environment = environment;
-				EnvironmentSetting.tenant = tenant.toUpperCase();
-
-			} else {
-				System.out.println("provide a valid environment followed by <tenant>-<environment>.gfcp.io");
-			}
-		} else {
-			System.out.println("provide a valid environment followed by <tenant>-<environment>.gfcp.io");
-		}
-
-	}
+	
 	public static String getTenant() {
 		return tenant;
 	}
 	public static void setTenant(String tenant) {
-		EnvironmentSetting.tenant = tenant;
+		EnvironmentSetting.tenant = tenant.toUpperCase();
+	}
+	public static String getEnv() {
+		return env;
+	}
+	public static void setEnv(String env) {
+		EnvironmentSetting.env = env.toLowerCase();
 	}
 	
 	

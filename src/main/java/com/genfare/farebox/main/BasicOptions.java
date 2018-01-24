@@ -45,6 +45,7 @@ public class BasicOptions {
 		options.addOption("environment", false, "listing Device configuration details");
 		options.addOption("exit", false, "exit from the farebox");
 		options.addOption("authenticate", false, "authenticate farebox");
+		options.addOption("help",true, "fdgfdghfgh");
 		OptionBuilder.withArgName("type value");
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
@@ -55,21 +56,21 @@ public class BasicOptions {
 		OptionBuilder.withArgName("wallets username password");
 		OptionBuilder.hasArgs(3);
 		OptionBuilder.withValueSeparator(' ');
-		OptionBuilder.withDescription("start ridership");
+		OptionBuilder.withDescription("retrieving wallets");
 		Option property4 = OptionBuilder.create("get");
 		options.addOption(property4);
 
 		OptionBuilder.withArgName("username password");
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
-		OptionBuilder.withDescription("start ridership");
+		OptionBuilder.withDescription("user login");
 		Option property5 = OptionBuilder.create("login");
 		options.addOption(property5);
 		
 		OptionBuilder.withArgName("eid cardNumber");
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
-		OptionBuilder.withDescription("start ridership");
+		OptionBuilder.withDescription("get electronic_Id");
 		Option property6 = OptionBuilder.create("get");
 		options.addOption(property6);
 		System.out.println("Usage : <command> <option> <arguments..>");
@@ -165,9 +166,12 @@ public class BasicOptions {
 			arguments = line.getOptionValues("set");
 			if (isValidate2(arguments)) {
 				switch (arguments[0]) {
-				case "environment":
-					EnvironmentSetting.setEnvironment(arguments[1]);
+				case "env":
+					EnvironmentSetting.setEnv(arguments[1]);
 					break;
+				case "tenant":
+					EnvironmentSetting.setTenant(arguments[1]);
+					break;	
 				case "fbxSerialNumber":
 					EnvironmentSetting.setFbSerialNumber(arguments[1]);
 					break;
@@ -197,6 +201,7 @@ public class BasicOptions {
 		case "-devicelog":
 			System.out.println("serialNumber :" + EnvironmentSetting.getFbSerialNumber());
 			System.out.println("assetPassword :" + EnvironmentSetting.getFbPassword());
+			
 			break;
 		case "-login":
 			arguments = line.getOptionValues("login");
@@ -210,7 +215,17 @@ public class BasicOptions {
 		case "-environment":
 			System.out.println("Environment :" + EnvironmentSetting.getEnvironment());
 			System.out.println("tenant :" +EnvironmentSetting.getTenant());
+			System.out.println("env :" + EnvironmentSetting.getEnv());
 			break;
+		
+		case "-help":arguments = line.getOptionValues("help");
+					if(arguments.length==1)
+					{
+						ListOptions listOptions1 = new ListOptions();
+						listOptions1.getCommandDescription(arguments[0]);
+					}
+			break;
+		
 		case "-exit":
 			System.exit(0);
 
