@@ -43,7 +43,7 @@ public class RiderShip {
 	static final String AUTH_HEADER_PROPERTY = "Authorization";
 	InputStream input = null;
 	Properties property = new Properties();
-	
+	DateType dateType = new DateType();
 	
 	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String electronicId, String sequenceNumber) {
 
@@ -67,7 +67,9 @@ public class RiderShip {
 
 		String uploadUrlString = "https://"+EnvironmentSetting.getEnvironment()+"/services/device/authenticated/v2/event";
 
-		DeviceEventAPI deviceEventAPI = getDeviceEventObject(property,electronicId,sequenceNumber);
+		DeviceEventAPI deviceEventAPI = getDeviceHeader();
+		deviceEventAPI = getUsageRecords(deviceEventAPI,electronicId,sequenceNumber);
+		
 		String xml = makeXml(deviceEventAPI);
 		return post(uploadUrlString, awsAuthorizationKey, xml);
 
@@ -75,11 +77,10 @@ public class RiderShip {
 
 
 	
-	private DeviceEventAPI getDeviceEventObject(Properties property2,String electronicId,String sequenceNumber) {
+	public DeviceEventAPI getDeviceHeader() {
 		
 		DeviceEventAPI deviceEventAPI = new DeviceEventAPI();
 		DeviceHeaderType deviceHeaderType = new DeviceHeaderType();
-		DateType dateType = new DateType();
 		dateType.setLocalTime(false);
 
 		XMLGregorianCalendar xmlgcal = getXMLGregorianCalendar(property.getProperty("dateofusage"));
@@ -97,9 +98,16 @@ public class RiderShip {
 		deviceHeaderType.setLocation(property.getProperty("Location"));
 		deviceHeaderType.setMessageId(property.getProperty("MessageId"));
 		deviceHeaderType.setCorrelationId(property.getProperty("CorrelationId"));
-
 		deviceEventAPI.setHeader(deviceHeaderType);
+		return deviceEventAPI;
 
+	}
+
+	
+	
+	
+	private DeviceEventAPI getUsageRecords(DeviceEventAPI deviceEventAPI, String electronicId, String sequenceNumber) {
+		
 		ArrayList<UsageRecordType> usageRecordTypes = new ArrayList<UsageRecordType>();
 		UsageRecordType usageRecordType = new UsageRecordType();
 		usageRecordType.setTerminalNumber(EnvironmentSetting.getFbSerialNumber());
@@ -132,12 +140,11 @@ public class RiderShip {
 		deviceEventAPI.getRecords().setUsages(new RecordsType.Usages());
 		deviceEventAPI.getRecords().getUsages().getUsage().add(usageRecordType);
 		return deviceEventAPI;
+		
+}
 
-	}
 
-	
-	
-	
+
 	public static XMLGregorianCalendar getXMLGregorianCalendar(String dateofusage) {
 		DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		Date date = null;
