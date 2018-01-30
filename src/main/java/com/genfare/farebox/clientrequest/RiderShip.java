@@ -1,6 +1,5 @@
 package com.genfare.farebox.clientrequest;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -27,13 +26,13 @@ import org.jboss.resteasy.util.Base64;
 
 import com.genfare.cloud.device.common.DateType;
 import com.genfare.cloud.device.header.DeviceHeaderType;
-import com.genfare.cloud.device.record.AutoloadRecordType;
 import com.genfare.cloud.device.record.DeviceEventAPI;
 import com.genfare.cloud.device.record.RecordsType;
 import com.genfare.cloud.device.record.UsageRecordType;
 import com.genfare.cloud.osgi.device.auth.response.AwsResponse.AwsCredentials;
 import com.genfare.cloud.osgi.device.auth.response.DeviceAuthResponse;
 import com.genfare.farebox.main.EnvironmentSetting;
+import com.genfare.farebox.util.PropertiesRetrieve;
 
 public class RiderShip {
 
@@ -42,7 +41,9 @@ public class RiderShip {
 	
 	static final String AUTH_HEADER_PROPERTY = "Authorization";
 	InputStream input = null;
-	Properties property = new Properties();
+	
+	PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
+	Properties property = propertiesRetrieve.getProperties(); 
 	DateType dateType = new DateType();
 	
 	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String electronicId, String sequenceNumber) {
@@ -53,18 +54,6 @@ public class RiderShip {
 		String sessionId = awsCredentials.getSessionId();
 		byte[] authorizationBytes = (accessKey + " | " + secretKey + " | " + sessionId).getBytes();
 		String awsAuthorizationKey = new String(Base64.encodeBytes(authorizationBytes));
-		try {
-			String filename = "device.properties";
-			input = RiderShip.class.getClassLoader().getResourceAsStream(filename);
-			if (input == null) {
-				log.info("Sorry, unable to find " + filename);
-			} else {
-				property.load(input);
-			}
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-
 		String uploadUrlString = "https://"+EnvironmentSetting.getEnvironment()+"/services/device/authenticated/v2/event";
 
 		DeviceEventAPI deviceEventAPI = getDeviceHeader();
@@ -82,10 +71,18 @@ public class RiderShip {
 		DeviceEventAPI deviceEventAPI = new DeviceEventAPI();
 		DeviceHeaderType deviceHeaderType = new DeviceHeaderType();
 		dateType.setLocalTime(false);
+		XMLGregorianCalendar xMLGregorianCalendar = null;
+		
+		if (EnvironmentSetting.getDateofusage() == null) {
+			Date date = new Date();
+			xMLGregorianCalendar = RiderShip
+					.getXMLGregorianCalendar(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
 
-		XMLGregorianCalendar xmlgcal = getXMLGregorianCalendar(property.getProperty("dateofusage"));
-		dateType.setValue(xmlgcal);
-
+		} else {
+			xMLGregorianCalendar = RiderShip.getXMLGregorianCalendar(EnvironmentSetting.getDateofusage());
+		}
+		
+		dateType.setValue(xMLGregorianCalendar);
 		deviceHeaderType.setTenantName(property.getProperty(EnvironmentSetting.getTenant()));
 		deviceHeaderType.setEnvironment(property.getProperty(EnvironmentSetting.getEnv()));
 		deviceHeaderType.setDeviceType(property.getProperty("deviceType"));
@@ -109,6 +106,22 @@ public class RiderShip {
 	private DeviceEventAPI getUsageRecords(DeviceEventAPI deviceEventAPI, String electronicId, String sequenceNumber) {
 		
 		ArrayList<UsageRecordType> usageRecordTypes = new ArrayList<UsageRecordType>();
+		UsageRecordType usageRecordType = prepareUsageRecord(electronicId);
+		
+		BigInteger sum = BigInteger.valueOf(0);
+		sum = sum.add(BigInteger.valueOf(Long.parseLong(sequenceNumber)));
+		usageRecordType.setSequenceNumber(sum);
+		usageRecordTypes.add(usageRecordType);
+		deviceEventAPI.setRecords(new RecordsType());
+		deviceEventAPI.getRecords().setUsages(new RecordsType.Usages());
+		deviceEventAPI.getRecords().getUsages().getUsage().add(usageRecordType);
+		return deviceEventAPI;
+		
+}
+
+
+
+	private UsageRecordType prepareUsageRecord(String electronicId) {
 		UsageRecordType usageRecordType = new UsageRecordType();
 		usageRecordType.setTerminalNumber(EnvironmentSetting.getFbSerialNumber());
 		usageRecordType.setTimestamp(new DateType());
@@ -131,17 +144,8 @@ public class RiderShip {
 
 		usageRecordType.setDateOfUsage(dateType);
 		usageRecordType.setTimestamp(dateType);
-		
-		BigInteger sum = BigInteger.valueOf(0);
-		sum = sum.add(BigInteger.valueOf(Long.parseLong(sequenceNumber)));
-		usageRecordType.setSequenceNumber(sum);
-		usageRecordTypes.add(usageRecordType);
-		deviceEventAPI.setRecords(new RecordsType());
-		deviceEventAPI.getRecords().setUsages(new RecordsType.Usages());
-		deviceEventAPI.getRecords().getUsages().getUsage().add(usageRecordType);
-		return deviceEventAPI;
-		
-}
+		return usageRecordType;
+	}
 
 
 
@@ -167,7 +171,7 @@ public class RiderShip {
 	
 	
 	
-	private String makeXml(DeviceEventAPI deviceEventAPI) {
+	public String makeXml(DeviceEventAPI deviceEventAPI) {
 		JAXBContext jaxbContext;
 		StringWriter sw = null;
 		try {
@@ -186,7 +190,7 @@ public class RiderShip {
 	
 	
 	
-	private String post(String uploadUrlString, String awsAuthorizationKey, String xml) {
+	public String post(String uploadUrlString, String awsAuthorizationKey, String xml) {
 		HttpURLConnection con = null;
 		String responseMessage = "";
 		try {

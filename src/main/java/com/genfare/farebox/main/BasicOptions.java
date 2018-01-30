@@ -13,6 +13,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 import com.genfare.farebox.main.EnvironmentSetting;
+import com.genfare.farebox.optionsImpl.AutoloadOptImpl;
 import com.genfare.farebox.optionsImpl.DeviceAuthOptImpl;
 import com.genfare.farebox.optionsImpl.ElectronicID;
 import com.genfare.farebox.optionsImpl.RiderShipImpl;
@@ -22,7 +23,8 @@ import com.genfare.farebox.util.ListOptions;
 
 public class BasicOptions {
 	private static final Logger log = Logger.getLogger(BasicOptions.class.getName());
-	public static  ArrayList<String> commands = new ArrayList<String>();
+	public static ArrayList<String> commands = new ArrayList<String>();
+
 	public static void main(String[] args) {
 		Options options = new Options();
 
@@ -40,12 +42,14 @@ public class BasicOptions {
 		OptionBuilder.withDescription("start ridership");
 		Option property2 = OptionBuilder.create("tap");
 		options.addOption(property2);
-		options.addOption("list","LIST", false, "listing all options");
+		
+		
+		options.addOption("list", "LIST", false, "listing all options");
 		options.addOption("devicelog", false, "listing Device configuration details");
 		options.addOption("environment", false, "listing Device configuration details");
 		options.addOption("exit", false, "exit from the farebox");
 		options.addOption("authenticate", false, "authenticate farebox");
-		options.addOption("help",true, "fdgfdghfgh");
+		options.addOption("help", true, "fdgfdghfgh");
 		OptionBuilder.withArgName("type value");
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
@@ -66,25 +70,32 @@ public class BasicOptions {
 		OptionBuilder.withDescription("user login");
 		Option property5 = OptionBuilder.create("login");
 		options.addOption(property5);
-		
+
 		OptionBuilder.withArgName("eid cardNumber");
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("get electronic_Id");
 		Option property6 = OptionBuilder.create("get");
 		options.addOption(property6);
+		
+		OptionBuilder.withArgName("electronicId sequencenumber");
+		OptionBuilder.hasArgs(2);
+		OptionBuilder.withValueSeparator(' ');
+		OptionBuilder.withDescription("start autoload");
+		Option property7 = OptionBuilder.create("autoload");
+		options.addOption(property7);
+		
 		System.out.println("Usage : <command> <option> <arguments..>");
 		System.out.println("example list");
 		for (;;) {
 			try {
 				System.out.println();
-				if(args.length==0)
-				System.out.printf("farebox>");
-				else
-				{
-					System.out.printf(args[0]+">");	
+				if (args.length == 0)
+					System.out.printf("farebox>");
+				else {
+					System.out.printf(args[0] + ">");
 				}
-				
+
 				BufferedReader inp = new BufferedReader(new InputStreamReader(System.in));
 
 				String args2 = null;
@@ -93,7 +104,7 @@ public class BasicOptions {
 					commands.add(args2);
 					args2 = "-" + args2;
 				} catch (IOException e) {
-					
+
 					e.printStackTrace();
 					continue;
 				}
@@ -107,61 +118,79 @@ public class BasicOptions {
 				}
 
 			} catch (Exception ex) {
-				System.out.println("Error:"+ex.getMessage());
+				System.out.println("Error:" + ex.getMessage());
 				continue;
 			}
 		}
 
 	}
 
-	
 	public static void getResponse(String option, CommandLine line) {
 		String[] arguments;
 		DeviceAuthOptImpl deviceAuth;
 		switch (option) {
-		case "-list":ListOptions listOptions = new ListOptions();
-		listOptions.getListOfOptions();
+		
+		case "-list":
+			ListOptions listOptions = new ListOptions();
+			listOptions.getListOfOptions();
 			break;
+		
 		case "-authenticate":
 			deviceAuth = new DeviceAuthOptImpl();
 			System.out.println(deviceAuth.authenticate(EnvironmentSetting.getFbSerialNumber(),
 					EnvironmentSetting.getFbPassword()));
 			break;
+			
+		case "-autoload":
+			arguments = line.getOptionValues("autoload");
+			if (isValidate2(arguments)) {
+				AutoloadOptImpl AutoloadOptImpl = new AutoloadOptImpl();
+				AutoloadOptImpl.autoloadProcess(arguments[0], arguments[1]);
+			} else
+				System.out.println("must have two arguments(ElectronicId and Password");
+			break;
+			
 		case "-auth":
-			deviceAuth = new DeviceAuthOptImpl();
 			arguments = line.getOptionValues("auth");
-			if (isValidate2(arguments))
+			if (isValidate2(arguments)) {
+				deviceAuth = new DeviceAuthOptImpl();
 				System.out.println(deviceAuth.authenticate(arguments[0], arguments[1]));
-			else
+			} else
 				System.out.println("must have two arguments(SerialNumber and Password");
 			break;
+
+		
+		
+		
+		
 		case "-get":
 			arguments = line.getOptionValues("get");
-				switch (arguments[0]) {
-				case "wallets":if (isValidate3(arguments))
-				{
+			switch (arguments[0]) {
+			case "wallets":
+				if (isValidate3(arguments)) {
 					WalletsOptImpl wallets = new WalletsOptImpl();
 
 					wallets.getWallets(arguments[1], arguments[2]);
-				}
-				else
-				{
+				} else {
 					System.out.println("provide Username and Password");
 				}
-					break;
-				case "eid":if (isValidate2(arguments))
-				{
+				break;
+			
+			case "eid":
+				if (isValidate2(arguments)) {
 					ElectronicID electronicID = new ElectronicID();
 					electronicID.getElectronicId(arguments[1]);
-					
-				}
-				else
-				{
+
+				} else {
 					System.out.println("must have a option and one argument");
 				}
 			}
 			break;
 
+		
+		
+		
+		
 		case "-set":
 			arguments = line.getOptionValues("set");
 			if (isValidate2(arguments)) {
@@ -171,7 +200,7 @@ public class BasicOptions {
 					break;
 				case "tenant":
 					EnvironmentSetting.setTenant(arguments[1]);
-					break;	
+					break;
 				case "fbxSerialNumber":
 					EnvironmentSetting.setFbSerialNumber(arguments[1]);
 					break;
@@ -188,6 +217,9 @@ public class BasicOptions {
 			}
 			break;
 
+		
+		
+		
 		case "-tap":
 			arguments = line.getOptionValues("tap");
 			if (isValidate2(arguments)) {
@@ -198,11 +230,12 @@ public class BasicOptions {
 				System.out.println("must have two arguments(ElectronicId and SequenceNumber)");
 			}
 			break;
+		
 		case "-devicelog":
 			System.out.println("serialNumber :" + EnvironmentSetting.getFbSerialNumber());
 			System.out.println("assetPassword :" + EnvironmentSetting.getFbPassword());
-			
 			break;
+		
 		case "-login":
 			arguments = line.getOptionValues("login");
 			if (isValidate2(arguments)) {
@@ -212,20 +245,21 @@ public class BasicOptions {
 				System.out.println("must have two arguments(username and password)");
 			}
 			break;
+		
 		case "-environment":
 			System.out.println("Environment :" + EnvironmentSetting.getEnvironment());
-			System.out.println("tenant :" +EnvironmentSetting.getTenant());
+			System.out.println("tenant :" + EnvironmentSetting.getTenant());
 			System.out.println("env :" + EnvironmentSetting.getEnv());
 			break;
-		
-		case "-help":arguments = line.getOptionValues("help");
-					if(arguments.length==1)
-					{
-						ListOptions listOptions1 = new ListOptions();
-						listOptions1.getCommandDescription(arguments[0]);
-					}
+
+		case "-help":
+			arguments = line.getOptionValues("help");
+			if (arguments.length == 1) {
+				ListOptions listOptions1 = new ListOptions();
+				listOptions1.getCommandDescription(arguments[0]);
+			}
 			break;
-		
+
 		case "-exit":
 			System.exit(0);
 
