@@ -1,20 +1,30 @@
 package com.genfare.farebox.optionsImpl;
 
+import java.util.Properties;
+
 import com.genfare.cloud.osgi.device.auth.response.DeviceAuthResponse;
 import com.genfare.farebox.clientrequest.DeviceAuthentication;
 import com.genfare.farebox.main.EnvironmentSetting;
+import com.genfare.farebox.util.PropertiesRetrieve;
 
 public class DeviceAuthOptImpl {
 
 	
-	public String authenticate(String fareBoxSerialNumber,String fareBoxPassword) {
+	public String authenticate() {
+		
+		PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
+		Properties property = propertiesRetrieve.getProperties(); 
+		
+		String serialNumber = property.getProperty(EnvironmentSetting.getEnv()+".fbxno");
+		String password = property.getProperty(EnvironmentSetting.getEnv()+".pwd");
+		
 		
 		DeviceAuthentication deviceAuthentication = new DeviceAuthentication();
-		DeviceAuthResponse deviceAuthResponse = deviceAuthentication.authenticate(fareBoxSerialNumber, fareBoxPassword);
+		DeviceAuthResponse deviceAuthResponse = deviceAuthentication.authenticate(serialNumber,password);
 		if(deviceAuthResponse != null)
 		{
-			EnvironmentSetting.setFbSerialNumber(fareBoxSerialNumber);
-			EnvironmentSetting.setFbPassword(fareBoxPassword);
+			EnvironmentSetting.setFbSerialNumber(serialNumber);
+			EnvironmentSetting.setFbPassword(password);
 			return "authentication successfull";
 		}
 		return "failed to authenticate";

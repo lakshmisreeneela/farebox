@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.cli.BasicParser;
@@ -27,14 +28,6 @@ public class BasicOptions {
 
 	public static void main(String[] args) {
 		Options options = new Options();
-
-		OptionBuilder.withArgName("serialNumber password");
-		OptionBuilder.hasArgs(2);
-		OptionBuilder.withValueSeparator(' ');
-		OptionBuilder.withDescription("start ridership");
-		Option property = OptionBuilder.create("auth");
-
-		options.addOption(property);
 
 		OptionBuilder.withArgName("electronicId sequencenumber");
 		OptionBuilder.hasArgs(2);
@@ -74,7 +67,7 @@ public class BasicOptions {
 		OptionBuilder.withArgName("eid cardNumber");
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
-		OptionBuilder.withDescription("get electronic_Id");
+		OptionBuilder.withDescription("getting electronic_Id of the card");
 		Option property6 = OptionBuilder.create("get");
 		options.addOption(property6);
 		
@@ -137,8 +130,7 @@ public class BasicOptions {
 		
 		case "-authenticate":
 			deviceAuth = new DeviceAuthOptImpl();
-			System.out.println(deviceAuth.authenticate(EnvironmentSetting.getFbSerialNumber(),
-					EnvironmentSetting.getFbPassword()));
+			System.out.println(deviceAuth.authenticate());
 			break;
 			
 		case "-autoload":
@@ -147,21 +139,9 @@ public class BasicOptions {
 				AutoloadOptImpl AutoloadOptImpl = new AutoloadOptImpl();
 				AutoloadOptImpl.autoloadProcess(arguments[0], arguments[1]);
 			} else
-				System.out.println("must have two arguments(ElectronicId and Password");
+				System.out.println("must have two arguments(CardNumber and Password");
 			break;
 			
-		case "-auth":
-			arguments = line.getOptionValues("auth");
-			if (isValidate2(arguments)) {
-				deviceAuth = new DeviceAuthOptImpl();
-				System.out.println(deviceAuth.authenticate(arguments[0], arguments[1]));
-			} else
-				System.out.println("must have two arguments(SerialNumber and Password");
-			break;
-
-		
-		
-		
 		
 		case "-get":
 			arguments = line.getOptionValues("get");
@@ -196,10 +176,26 @@ public class BasicOptions {
 			if (isValidate2(arguments)) {
 				switch (arguments[0]) {
 				case "env":
-					EnvironmentSetting.setEnv(arguments[1]);
+					List<String> environments = new ArrayList<String>();
+					environments.add("intg");
+					environments.add("staging");
+					if (environments.contains(arguments[1])) {
+						EnvironmentSetting.setEnv(arguments[1]);
+					} else {
+						System.out.println("Enter a valid environment");
+						for (int i = 0; i < environments.size(); i++)
+							System.out.println(environments.get(i));
+					}
 					break;
-				case "tenant":
-					EnvironmentSetting.setTenant(arguments[1]);
+				case "tenant":List<String> tenants = new ArrayList<String>();
+				tenants.add("cdta");
+					if (tenants.contains(arguments[1])) {
+						EnvironmentSetting.setEnv(arguments[1]);
+					} else {
+						System.out.println("Enter a valid environment");
+						for (int i = 0; i < tenants.size(); i++)
+							System.out.println(tenants.get(i));
+					}
 					break;
 				case "fbxSerialNumber":
 					EnvironmentSetting.setFbSerialNumber(arguments[1]);
@@ -227,7 +223,7 @@ public class BasicOptions {
 				riderShip.riderShipProcess(arguments[0], arguments[1]);
 
 			} else {
-				System.out.println("must have two arguments(ElectronicId and SequenceNumber)");
+				System.out.println("must have two arguments(CardNumber and SequenceNumber)");
 			}
 			break;
 		

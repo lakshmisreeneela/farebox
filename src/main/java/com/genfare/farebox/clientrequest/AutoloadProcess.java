@@ -45,13 +45,14 @@ public class AutoloadProcess {
 
 	static final String AUTH_HEADER_PROPERTY = "Authorization";
 	InputStream input = null;
+	static Byte pendingCount = 0;
 	
-	PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
-	Properties property = propertiesRetrieve.getProperties(); 
+	static PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
+	static Properties property = propertiesRetrieve.getProperties(); 
 	DateType dateType = new DateType();
-	
+	static Long seqNumber;
 	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String electronicId, String sequenceNumber) {
-
+		seqNumber = Long.parseLong(sequenceNumber);
 		AwsCredentials awsCredentials = deviceAuthResponse.getAws().getCredentials();
 		String accessKey = awsCredentials.getAccessKey();
 		String secretKey = awsCredentials.getSecretKey();
@@ -61,8 +62,10 @@ public class AutoloadProcess {
 		String uploadUrlString = "https://"+EnvironmentSetting.getEnvironment()+"/services/device/authenticated/v2/event";
 		RiderShip riderShip = new RiderShip();
 		DeviceEventAPI deviceEventAPI = riderShip.getDeviceHeader();
-		deviceEventAPI = getAutoloadXML(electronicId,deviceEventAPI,sequenceNumber);
-		
+		List<AutoloadRecordType> autoloadRecordTypeList  = getAutoloadXML(electronicId);
+		deviceEventAPI.setRecords(new RecordsType());
+		deviceEventAPI.getRecords().setAutoloads(new RecordsType.Autoloads());
+		deviceEventAPI.getRecords().getAutoloads().getAutoload().addAll(autoloadRecordTypeList);
 		String xml = riderShip.makeXml(deviceEventAPI);
 		return riderShip.post(uploadUrlString, awsAuthorizationKey, xml);
 		//return "";
@@ -70,7 +73,7 @@ public class AutoloadProcess {
 	}
 
 
-	public DeviceEventAPI  getAutoloadXML(String electronicId, DeviceEventAPI deviceEventAPI, String sequenceNumber)
+	public List<AutoloadRecordType>  getAutoloadXML(String electronicId)
 	{
 		ClientConfiguration configuration = new ClientConfiguration();
 		AmazonS3Client amazonS3 = new AmazonS3Client(new DefaultAWSCredentialsProviderChain(), configuration);
@@ -78,7 +81,7 @@ public class AutoloadProcess {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(s3object.getObjectContent()));
 		String line;
 		StringBuilder autoloadxml = new StringBuilder();
-		
+		List<AutoloadRecordType> autoloadRecordTypeList = new ArrayList<AutoloadRecordType>();
 		try {
 
 			while ((line = reader.readLine()) != null) {
@@ -98,24 +101,27 @@ public class AutoloadProcess {
 			xPath.setNamespaceContext(new NamespaceResolver(doc));
 			XPathExpression addValue = xPath.compile("//ns2:AddValue[ns2:ElectronicId='"+electronicId+"']");
 			
+			
+			
 			NodeList nodeListWTAddValues = (NodeList) addValue.evaluate(doc, XPathConstants.NODESET);
-			deviceEventAPI = getAutoloadRecords(nodeListWTAddValues,deviceEventAPI,electronicId,sequenceNumber);
-			XPathExpression addProducts = xPath.compile("//ns2:AddProducts[ns2:ElectronicId='"+electronicId+"']");
+			autoloadRecordTypeList = getAutoloadRecords(nodeListWTAddValues,electronicId);
+			XPathExpression addProducts = xPath.compile("//ns2:AddProduct[ns2:ElectronicId='"+electronicId+"']");
 			NodeList nodeListWTAddProducts = (NodeList) addProducts.evaluate(doc, XPathConstants.NODESET);
-			deviceEventAPI = getAutoloadRecords(nodeListWTAddProducts,deviceEventAPI,electronicId,sequenceNumber);
-		
+			
+			autoloadRecordTypeList.addAll(getAutoloadRecords(nodeListWTAddProducts,electronicId));
+					
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
 	
-	return deviceEventAPI;
+	return autoloadRecordTypeList;
 	
 }
 	
 	
 	
-	private static DeviceEventAPI getAutoloadRecords(NodeList nodeList, DeviceEventAPI deviceEventAPI,String electronicId,String sequenceNumber) {
-		Long seqNumber = Long.parseLong(sequenceNumber);
+	private static List<AutoloadRecordType> getAutoloadRecords(NodeList nodeList,String electronicId) {
+		
 		
 		System.out.println(nodeList.getLength());
 		DateType dateType = new DateType();
@@ -132,14 +138,14 @@ public class AutoloadProcess {
 		List<AutoloadRecordType> autoloadRecordTypeList = new ArrayList<AutoloadRecordType>();
 		dateType.setLocalTime(false);
 		dateType.setValue(xMLGregorianCalendar);
-		Byte pendingCount = 0;
+		
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node nNode = nodeList.item(i);
 			NodeList childNodes = nNode.getChildNodes();
 			
 		
 			AutoloadRecordType autoloadRecordType = new AutoloadRecordType();
-			autoloadRecordType.setTerminalNumber(EnvironmentSetting.getFbSerialNumber());
+			autoloadRecordType.setTerminalNumber(property.getProperty(EnvironmentSetting.getEnv()+".fbxno"));
 			autoloadRecordType.setElectronicId(electronicId);
 			autoloadRecordType.setTimestamp(dateType);
 			BigInteger sum = BigInteger.valueOf(0);
@@ -152,8 +158,6 @@ public class AutoloadProcess {
 			autoloadRecordType.setTimestamp(dateType);
 			autoloadRecordType.setPendingCount(pendingCount);
 			pendingCount++;
-			deviceEventAPI.setRecords(new RecordsType());
-			deviceEventAPI.getRecords().setAutoloads(new RecordsType.Autoloads());
 			
 			
 			NodeList ticketChildNodes = childNodes.item(8).getChildNodes();
@@ -194,8 +198,8 @@ public class AutoloadProcess {
 			autoloadRecordTypeList.add(autoloadRecordType);
 		}
 			
-			deviceEventAPI.getRecords().getAutoloads().getAutoload().addAll(autoloadRecordTypeList);
-		return deviceEventAPI;
+			
+		return autoloadRecordTypeList;
 
 	}
 	

@@ -7,11 +7,11 @@ import com.genfare.farebox.clientrequest.Tokens;
 import com.genfare.farebox.clientrequest.WalletElectronicId;
 
 public class ElectronicID {
-public void getElectronicId(String cardNumber)
+public String getElectronicId(String cardNumber)
 {
 	Tokens tokens = new Tokens();
 	JSONObject jSONObject = tokens.getToken();
-	Object electronicid = null;
+	String electronicid = null;
 	if(jSONObject != null)
 	{
 		try {
@@ -26,23 +26,18 @@ public void getElectronicId(String cardNumber)
 				 JSONObject jSONArray2 = jSONArray.getJSONObject(i);
 				 if(jSONArray2.get("type").equals("electronic_id"))
 				 {
-					 electronicid = jSONArray2.get("identifier");
+					 electronicid = (String) jSONArray2.get("identifier");
 					 break;
 				 }
 			 }
 			System.out.println("Card Electronic_Id : "+electronicid);
-			 }
-			else
-				System.out.println("Invalid Card Number");
 			
-		} catch (JSONException e) {
+		} 
+		}catch (JSONException e) {
 			e.printStackTrace();
 		}
 	}
-		 else
-		 {
-			 System.out.println("Invalid CardNumber :"+cardNumber);
-		 }
+	return electronicid;
 	}
 }
 	

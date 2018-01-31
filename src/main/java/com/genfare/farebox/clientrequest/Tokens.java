@@ -23,8 +23,8 @@ public class Tokens {
 	public JSONObject getToken() {
 		PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 		Properties prop = propertiesRetrieve.getProperties();
-		String auth_username = prop.getProperty("auth_username_i");
-		String auth_password = prop.getProperty("auth_password_i");
+		String auth_username = prop.getProperty(EnvironmentSetting.getEnv()+".username");
+		String auth_password = prop.getProperty(EnvironmentSetting.getEnv()+".password");
 		byte[] authorizationBytes = (auth_username + ":" + auth_password).getBytes();
 		String authorizationHeader = AUTH_HEADER_PREFIX + " " + new String(Base64.encodeBase64(authorizationBytes));
 		String authUrlString = "https://"+EnvironmentSetting.getEnvironment()+"/authenticate/oauth/token?grant_type=client_credentials&client_id=coocoo";

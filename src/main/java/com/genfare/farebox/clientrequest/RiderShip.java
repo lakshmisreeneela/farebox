@@ -45,6 +45,7 @@ public class RiderShip {
 	PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 	Properties property = propertiesRetrieve.getProperties(); 
 	DateType dateType = new DateType();
+	String fbxNo = property.getProperty(EnvironmentSetting.getEnv()+".fbxno");
 	
 	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String electronicId, String sequenceNumber) {
 
@@ -87,7 +88,7 @@ public class RiderShip {
 		deviceHeaderType.setEnvironment(EnvironmentSetting.getEnv());
 		deviceHeaderType.setDeviceType(property.getProperty("deviceType"));
 		deviceHeaderType.setOrganization(EnvironmentSetting.getTenant());
-		deviceHeaderType.setSourceId(EnvironmentSetting.getFbSerialNumber());
+		deviceHeaderType.setSourceId(fbxNo);
 		deviceHeaderType.setAction("UPDATE");
 		deviceHeaderType.setTestMode(true);
 		deviceHeaderType.setRetryNumber(0);
@@ -123,7 +124,7 @@ public class RiderShip {
 
 	private UsageRecordType prepareUsageRecord(String electronicId) {
 		UsageRecordType usageRecordType = new UsageRecordType();
-		usageRecordType.setTerminalNumber(EnvironmentSetting.getFbSerialNumber());
+		usageRecordType.setTerminalNumber(fbxNo);
 		usageRecordType.setTimestamp(new DateType());
 		usageRecordType.setTerminalType(property.getProperty("deviceType"));
 		usageRecordType.setDesignator(Integer.parseInt(property.getProperty("Designator")));
@@ -135,10 +136,10 @@ public class RiderShip {
 
 		usageRecordType.setElectronicId(electronicId);
 		usageRecordType.setPendingCount(0);
-		usageRecordType.setPayGoType(1);
+		usageRecordType.setPayGoType(0);
 		usageRecordType.setLatitude("0.0000");
 		usageRecordType.setLongitude("0.0000");
-		usageRecordType.setPaymenttype("STORED_VALUE");
+		usageRecordType.setPaymenttype("EXISTING_FARECARD");
 		usageRecordType.setFareset(Integer.parseInt(property.getProperty("fareset")));
 		usageRecordType.setTTP(62);
 

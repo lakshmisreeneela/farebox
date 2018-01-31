@@ -81,6 +81,10 @@ public class DeviceAuthentication {
 			if (response.getStatus() != 200 && response.getStatus() != 201) {
 				log.info("Failed : HTTP error code : " + response.getStatus() + responseAsString);
 			} else {
+				EnvironmentSetting.setFbSerialNumber(fareBoxSerialNumber);
+				EnvironmentSetting.setFbPassword(fareBoxPassword);
+				
+				
 				ObjectMapper mapper2 = new ObjectMapper();
 				deviceAuthResponse = mapper2.readValue(responseAsString, DeviceAuthResponse.class);
 				System.out.println("Successfully authenticated...");
