@@ -61,16 +61,16 @@ public class AutoloadProcess {
 		String uploadUrlString = "https://"+EnvironmentSetting.getEnvironment()+"/services/device/authenticated/v2/event";
 		RiderShip riderShip = new RiderShip();
 		DeviceEventAPI deviceEventAPI = riderShip.getDeviceHeader();
-		NodeList nodeList = getAutoloadXML(electronicId);
-		deviceEventAPI = getAutoloadRecords(nodeList,deviceEventAPI,electronicId,sequenceNumber);
+		deviceEventAPI = getAutoloadXML(electronicId,deviceEventAPI,sequenceNumber);
+		
 		String xml = riderShip.makeXml(deviceEventAPI);
-		//return riderShip.post(uploadUrlString, awsAuthorizationKey, xml);
-		return "";
+		return riderShip.post(uploadUrlString, awsAuthorizationKey, xml);
+		//return "";
 
 	}
 
 
-	public NodeList  getAutoloadXML(String electronicId)
+	public DeviceEventAPI  getAutoloadXML(String electronicId, DeviceEventAPI deviceEventAPI, String sequenceNumber)
 	{
 		ClientConfiguration configuration = new ClientConfiguration();
 		AmazonS3Client amazonS3 = new AmazonS3Client(new DefaultAWSCredentialsProviderChain(), configuration);
@@ -78,7 +78,7 @@ public class AutoloadProcess {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(s3object.getObjectContent()));
 		String line;
 		StringBuilder autoloadxml = new StringBuilder();
-		NodeList nodeList = null;
+		
 		try {
 
 			while ((line = reader.readLine()) != null) {
@@ -89,20 +89,26 @@ public class AutoloadProcess {
 			factory.setNamespaceAware(true);
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			InputSource xml = new InputSource(new StringReader(autoloadxml.toString()));
+			
+			System.out.println(autoloadxml.toString());
 			Document doc = builder.parse(xml);
 
 			XPathFactory xpathFactory = XPathFactory.newInstance();
 			XPath xPath = xpathFactory.newXPath();
 			xPath.setNamespaceContext(new NamespaceResolver(doc));
-			XPathExpression expr = xPath.compile("//ns2:AddProduct[ns2:ElectronicId='"+electronicId+"']");
-
-		    nodeList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
+			XPathExpression addValue = xPath.compile("//ns2:AddValue[ns2:ElectronicId='"+electronicId+"']");
+			
+			NodeList nodeListWTAddValues = (NodeList) addValue.evaluate(doc, XPathConstants.NODESET);
+			deviceEventAPI = getAutoloadRecords(nodeListWTAddValues,deviceEventAPI,electronicId,sequenceNumber);
+			XPathExpression addProducts = xPath.compile("//ns2:AddProducts[ns2:ElectronicId='"+electronicId+"']");
+			NodeList nodeListWTAddProducts = (NodeList) addProducts.evaluate(doc, XPathConstants.NODESET);
+			deviceEventAPI = getAutoloadRecords(nodeListWTAddProducts,deviceEventAPI,electronicId,sequenceNumber);
+		
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
 	
-	return nodeList;
+	return deviceEventAPI;
 	
 }
 	
@@ -126,6 +132,7 @@ public class AutoloadProcess {
 		List<AutoloadRecordType> autoloadRecordTypeList = new ArrayList<AutoloadRecordType>();
 		dateType.setLocalTime(false);
 		dateType.setValue(xMLGregorianCalendar);
+		Byte pendingCount = 0;
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node nNode = nodeList.item(i);
 			NodeList childNodes = nNode.getChildNodes();
@@ -143,8 +150,14 @@ public class AutoloadProcess {
 			autoloadRecordType.setStatus("SUCCESS");
 			autoloadRecordType.setReasonCode("SUCCESS");
 			autoloadRecordType.setTimestamp(dateType);
+			autoloadRecordType.setPendingCount(pendingCount);
+			pendingCount++;
 			deviceEventAPI.setRecords(new RecordsType());
 			deviceEventAPI.getRecords().setAutoloads(new RecordsType.Autoloads());
+			
+			
+			NodeList ticketChildNodes = childNodes.item(8).getChildNodes();
+			autoloadRecordType.setTicketId(Integer.parseInt(ticketChildNodes.item(0).getTextContent()));
 			
 
 			for (int j = 0; j < childNodes.getLength(); j++) {

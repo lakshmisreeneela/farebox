@@ -83,10 +83,10 @@ public class RiderShip {
 		}
 		
 		dateType.setValue(xMLGregorianCalendar);
-		deviceHeaderType.setTenantName(property.getProperty(EnvironmentSetting.getTenant()));
-		deviceHeaderType.setEnvironment(property.getProperty(EnvironmentSetting.getEnv()));
+		deviceHeaderType.setTenantName(EnvironmentSetting.getTenant());
+		deviceHeaderType.setEnvironment(EnvironmentSetting.getEnv());
 		deviceHeaderType.setDeviceType(property.getProperty("deviceType"));
-		deviceHeaderType.setOrganization(property.getProperty(EnvironmentSetting.getTenant()));
+		deviceHeaderType.setOrganization(EnvironmentSetting.getTenant());
 		deviceHeaderType.setSourceId(EnvironmentSetting.getFbSerialNumber());
 		deviceHeaderType.setAction("UPDATE");
 		deviceHeaderType.setTestMode(true);
@@ -222,7 +222,7 @@ public class RiderShip {
 			log.info("Response Code: " + responseCode + ", Message: " + responseMessage);
 
 			if (responseCode == 200) {
-				System.out.println("Rider activity completed successfully");
+				System.out.println("process completed successfully");
 			}
 
 			else
