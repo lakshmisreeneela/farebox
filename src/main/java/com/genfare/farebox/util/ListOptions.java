@@ -28,8 +28,7 @@ public class ListOptions {
 		break;
 		case "set":System.out.println("syntax: "+"set env <Environment>");
 				   System.out.println("syntax: "+"set tenant <TenantName>");
-				   System.out.println("syntax: "+"set fbxSerialNumber <fbxSerialNumber>");
-		           System.out.println("syntax: "+"set fbxPassword <fbxPassword>");
+				  
 		break;
 		case "get":System.out.println("syntax: "+"get eid <cardNumber> (gives electronic_Id of the card)");
 		break;

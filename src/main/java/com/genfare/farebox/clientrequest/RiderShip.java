@@ -91,7 +91,7 @@ public class RiderShip {
 		deviceHeaderType.setSourceId(fbxNo);
 		deviceHeaderType.setAction("UPDATE");
 		deviceHeaderType.setTestMode(true);
-		deviceHeaderType.setRetryNumber(0);
+		deviceHeaderType.setRetryNumber(1);
 		deviceHeaderType.setDateSent(dateType);
 		deviceHeaderType.setLocation(property.getProperty("Location"));
 		deviceHeaderType.setMessageId(property.getProperty("MessageId"));
@@ -151,7 +151,7 @@ public class RiderShip {
 
 
 	public static XMLGregorianCalendar getXMLGregorianCalendar(String dateofusage) {
-		DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 		Date date = null;
 		try {
 			date = format.parse(dateofusage);

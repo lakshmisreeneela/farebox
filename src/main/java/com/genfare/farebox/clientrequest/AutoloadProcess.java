@@ -45,7 +45,7 @@ public class AutoloadProcess {
 
 	static final String AUTH_HEADER_PROPERTY = "Authorization";
 	InputStream input = null;
-	static Byte pendingCount = 0;
+	private Byte pendingCount = 0;
 	
 	static PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 	static Properties property = propertiesRetrieve.getProperties(); 
@@ -105,10 +105,10 @@ public class AutoloadProcess {
 			
 			NodeList nodeListWTAddValues = (NodeList) addValue.evaluate(doc, XPathConstants.NODESET);
 			autoloadRecordTypeList = getAutoloadRecords(nodeListWTAddValues,electronicId);
-			XPathExpression addProducts = xPath.compile("//ns2:AddProduct[ns2:ElectronicId='"+electronicId+"']");
-			NodeList nodeListWTAddProducts = (NodeList) addProducts.evaluate(doc, XPathConstants.NODESET);
+			//XPathExpression addProducts = xPath.compile("//ns2:AddProduct[ns2:ElectronicId='"+electronicId+"']");
+			//NodeList nodeListWTAddProducts = (NodeList) addProducts.evaluate(doc, XPathConstants.NODESET);
 			
-			autoloadRecordTypeList.addAll(getAutoloadRecords(nodeListWTAddProducts,electronicId));
+			//autoloadRecordTypeList.addAll(getAutoloadRecords(nodeListWTAddProducts,electronicId));
 					
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -120,7 +120,7 @@ public class AutoloadProcess {
 	
 	
 	
-	private static List<AutoloadRecordType> getAutoloadRecords(NodeList nodeList,String electronicId) {
+	private  List<AutoloadRecordType> getAutoloadRecords(NodeList nodeList,String electronicId) {
 		
 		
 		System.out.println(nodeList.getLength());
@@ -129,7 +129,7 @@ public class AutoloadProcess {
 		if(EnvironmentSetting.getDateofusage() == null)
 		{
 			Date date=new Date(); 
-			 xMLGregorianCalendar = RiderShip.getXMLGregorianCalendar(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+			 xMLGregorianCalendar = RiderShip.getXMLGregorianCalendar(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(date));
 		
 	    }else
 	     {
@@ -160,8 +160,8 @@ public class AutoloadProcess {
 			pendingCount++;
 			
 			
-			NodeList ticketChildNodes = childNodes.item(8).getChildNodes();
-			autoloadRecordType.setTicketId(Integer.parseInt(ticketChildNodes.item(0).getTextContent()));
+			//NodeList ticketChildNodes = childNodes.item(8).getChildNodes();
+			//autoloadRecordType.setTicketId(Integer.parseInt(ticketChildNodes.item(0).getTextContent()));
 			
 
 			for (int j = 0; j < childNodes.getLength(); j++) {
@@ -172,9 +172,9 @@ public class AutoloadProcess {
 				case "ns2:AutoloadType":
 					autoloadRecordType.setAutoloadType(nNode2.getTextContent());
 					break;
-				case "ns2:TicketId":
-					autoloadRecordType.setTicketId(Integer.parseInt(nNode2.getTextContent()));
-					break;
+				case "ns2:Ticket":NodeList ticketChildNodes = nNode2.getChildNodes();
+				autoloadRecordType.setTicketId(Integer.parseInt(ticketChildNodes.item(0).getTextContent()));
+				break;
 				case "ns2:OrderId":
 					autoloadRecordType.setOrderId(Integer.parseInt(nNode2.getTextContent()));
 					break;
