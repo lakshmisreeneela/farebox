@@ -44,8 +44,9 @@ public class RiderShip {
 	
 	PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 	Properties property = propertiesRetrieve.getProperties(); 
+	String tenant=EnvironmentSetting.getTenant().toLowerCase();
 	DateType dateType = new DateType();
-	String fbxNo = property.getProperty(EnvironmentSetting.getEnv()+".fbxno");
+	String fbxNo = property.getProperty(tenant+"."+EnvironmentSetting.getEnv()+".fbxno");
 	
 	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String electronicId, String sequenceNumber) {
 
@@ -220,7 +221,7 @@ public class RiderShip {
 
 			int responseCode = conn.getResponseCode();
 			responseMessage = conn.getResponseMessage();
-			log.info("Response Code: " + responseCode + ", Message: " + responseMessage);
+			//log.info("Response Code: " + responseCode + ", Message: " + responseMessage);
 
 			if (responseCode == 200) {
 				System.out.println("process completed successfully");

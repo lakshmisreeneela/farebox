@@ -13,16 +13,17 @@ public class PropertiesRetrieve {
 		InputStream input = null;
 		try {
 			
-			 input = new FileInputStream("F:/device.properties");
-			if (input == null) {
-				System.out.println("unable to find properties file");
-			}
-			prop.load(input);
+			 input = new FileInputStream("C:/farebox/device.properties");
+			if (input != null) {
+				prop.load(input);
+			} 
 		} catch (IOException ex) {
 
 			ex.printStackTrace();
 		}
+		
 	
 		return prop;
 	}
 }
+

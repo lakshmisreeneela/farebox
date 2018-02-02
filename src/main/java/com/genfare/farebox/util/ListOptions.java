@@ -12,6 +12,7 @@ public class ListOptions {
 		System.out.println("SET          Sets Device and Environment variables.");
 		System.out.println("GET          Gives the required data based on option and argument.");
 		System.out.println("TAP          Perform ridership event for the specified card.");
+		System.out.println("AUTOLOAD    Autoload the processing productes into the card");
 	}
 	
 	
@@ -26,35 +27,17 @@ public class ListOptions {
 		case "auth":System.out.println("need to provide two arguments device serialNumber and Password");
 		System.out.println("syntax: "+"auth <DeviceSerialNumber> <DevicePassword>");
 		break;
-		case "set":System.out.println("syntax: "+"set env <Environment>");
-				   System.out.println("syntax: "+"set tenant <TenantName>");
-				  
+		case "set":System.out.println("syntax: "+"set env <TenantName> <Environment>");
 		break;
 		case "get":System.out.println("syntax: "+"get eid <cardNumber> (gives electronic_Id of the card)");
 		break;
-		case "tap":System.out.println("need to provide two arguments Electronic_id of the card and SequenceNumber");
-					System.out.println("syntax: "+"tap <cardElectronicId> <sequenceNumber>");
+		case "tap":System.out.println("need to provide two arguments cardNumber of the card and SequenceNumber");
+					System.out.println("syntax: "+"tap <cardNumber> <sequenceNumber>");
+		case "autoload":System.out.println("need to provide two arguments cardNumber of the card and SequenceNumber");
+		System.out.println("syntax: "+"autoload <cardNumber> <sequenceNumber>");
 		break;
 		
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 }

@@ -4,8 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
+import java.util.Properties;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -13,17 +12,23 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
-import com.genfare.farebox.main.EnvironmentSetting;
 import com.genfare.farebox.optionsImpl.AutoloadOptImpl;
 import com.genfare.farebox.optionsImpl.DeviceAuthOptImpl;
 import com.genfare.farebox.optionsImpl.ElectronicID;
 import com.genfare.farebox.optionsImpl.RiderShipImpl;
-import com.genfare.farebox.optionsImpl.UserLoginOptImpl;
-import com.genfare.farebox.optionsImpl.WalletsOptImpl;
 import com.genfare.farebox.util.ListOptions;
+import com.genfare.farebox.util.PropertiesRetrieve;
 
 public class BasicOptions {
-	private static final Logger log = Logger.getLogger(BasicOptions.class.getName());
+	
+	
+	static PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
+	
+	
+	static Properties property = propertiesRetrieve.getProperties(); 
+
+	
+	//private static final Logger log = Logger.getLogger(BasicOptions.class.getName());
 	public static ArrayList<String> commands = new ArrayList<String>();
 
 	public static void main(String[] args) {
@@ -43,26 +48,13 @@ public class BasicOptions {
 		options.addOption("exit", false, "exit from the farebox");
 		options.addOption("authenticate", false, "authenticate farebox");
 		options.addOption("help", true, "fdgfdghfgh");
-		OptionBuilder.withArgName("type value");
-		OptionBuilder.hasArgs(2);
-		OptionBuilder.withValueSeparator(' ');
-		OptionBuilder.withDescription("start ridership");
-		Option property3 = OptionBuilder.create("set");
-		options.addOption(property3);
-
-		OptionBuilder.withArgName("wallets username password");
+		
+		OptionBuilder.withArgName("env tenant environment");
 		OptionBuilder.hasArgs(3);
 		OptionBuilder.withValueSeparator(' ');
-		OptionBuilder.withDescription("retrieving wallets");
-		Option property4 = OptionBuilder.create("get");
-		options.addOption(property4);
-
-		OptionBuilder.withArgName("username password");
-		OptionBuilder.hasArgs(2);
-		OptionBuilder.withValueSeparator(' ');
-		OptionBuilder.withDescription("user login");
-		Option property5 = OptionBuilder.create("login");
-		options.addOption(property5);
+		OptionBuilder.withDescription("set environmet variables");
+		Option property3 = OptionBuilder.create("set");
+		options.addOption(property3);
 
 		OptionBuilder.withArgName("eid cardNumber");
 		OptionBuilder.hasArgs(2);
@@ -73,7 +65,6 @@ public class BasicOptions {
 		
 		OptionBuilder.withArgName("electronicId sequencenumber");
 		OptionBuilder.hasArgs(2);
-		
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("start autoload");
 		Option property7 = OptionBuilder.create("autoload");
@@ -147,15 +138,6 @@ public class BasicOptions {
 		case "-get":
 			arguments = line.getOptionValues("get");
 			switch (arguments[0]) {
-			case "wallets":
-				if (isValidate3(arguments)) {
-					WalletsOptImpl wallets = new WalletsOptImpl();
-
-					wallets.getWallets(arguments[1], arguments[2]);
-				} else {
-					System.out.println("provide Username and Password");
-				}
-				break;
 			
 			case "eid":
 				if (isValidate2(arguments)) {
@@ -174,48 +156,26 @@ public class BasicOptions {
 		
 		case "-set":
 			arguments = line.getOptionValues("set");
-			if (isValidate2(arguments)) {
+			if (isValidate3(arguments)) {
 				switch (arguments[0]) {
 				case "env":
-					List<String> environments = new ArrayList<String>();
-					environments.add("intg");
-					environments.add("staging");
-					if (environments.contains(arguments[1])) {
-						EnvironmentSetting.setEnv(arguments[1]);
+					String environment = property.toString();
+					if (environment.contains(arguments[1] + "." + arguments[2])) {
+						EnvironmentSetting.setTenant(arguments[1]);
+						EnvironmentSetting.setEnv(arguments[2].toUpperCase());
 					} else {
-						System.out.println("Enter a valid environment");
-						for (int i = 0; i < environments.size(); i++)
-							System.out.println(environments.get(i));
+						System.out.println("environment doesn't exist");
 					}
-					break;
-				case "tenant":List<String> tenants = new ArrayList<String>();
-				tenants.add("cdta");
-					if (tenants.contains(arguments[1])) {
-						EnvironmentSetting.setEnv(arguments[1]);
-					} else {
-						System.out.println("Enter a valid environment");
-						for (int i = 0; i < tenants.size(); i++)
-							System.out.println(tenants.get(i));
-					}
-					break;
-				case "fbxSerialNumber":
-					EnvironmentSetting.setFbSerialNumber(arguments[1]);
-					break;
-				case "fbxPassword":
-					EnvironmentSetting.setFbPassword(arguments[1]);
-					break;
-				default:
-					System.out.println("there is no such variable");
-
-					break;
 				}
 			} else {
-				System.out.println("must have two arguments(Typel and VALUE)");
+				System.out.println("must have option(env) and two arguments <tenant> <environment>");
+
 			}
 			break;
-
-		
-		
+		default:
+			System.out.println("there is no such variable");
+			break;
+			
 		
 		case "-tap":
 			arguments = line.getOptionValues("tap");
@@ -231,16 +191,6 @@ public class BasicOptions {
 		case "-devicelog":
 			System.out.println("serialNumber :" + EnvironmentSetting.getFbSerialNumber());
 			System.out.println("assetPassword :" + EnvironmentSetting.getFbPassword());
-			break;
-		
-		case "-login":
-			arguments = line.getOptionValues("login");
-			if (isValidate2(arguments)) {
-				UserLoginOptImpl userLoginOptImpl = new UserLoginOptImpl();
-				userLoginOptImpl.userLogin(arguments[0], arguments[1]);
-			} else {
-				System.out.println("must have two arguments(username and password)");
-			}
 			break;
 		
 		case "-environment":

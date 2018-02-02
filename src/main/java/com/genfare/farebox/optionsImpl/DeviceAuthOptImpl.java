@@ -14,9 +14,9 @@ public class DeviceAuthOptImpl {
 		
 		PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 		Properties property = propertiesRetrieve.getProperties(); 
-		
-		String serialNumber = property.getProperty(EnvironmentSetting.getEnv()+".fbxno");
-		String password = property.getProperty(EnvironmentSetting.getEnv()+".pwd");
+		String tenant=EnvironmentSetting.getTenant().toLowerCase();
+		String serialNumber = property.getProperty(tenant+"."+EnvironmentSetting.getEnv()+".fbxno");
+		String password = property.getProperty(tenant+"."+EnvironmentSetting.getEnv()+".pwd");
 		
 		
 		DeviceAuthentication deviceAuthentication = new DeviceAuthentication();

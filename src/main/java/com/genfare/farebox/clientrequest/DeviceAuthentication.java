@@ -67,7 +67,7 @@ public class DeviceAuthentication {
 
 		String authorizationHeader = AUTH_HEADER_PREFIX + " " + new String(Base64.encodeBase64(authorizationBytes));
 
-		System.out.println(authorizationHeader);
+		//System.out.println(authorizationHeader);
 		javax.ws.rs.client.Client client = ClientBuilder.newClient();
 		try {
 			MultivaluedMap<String, Object> head = new MultivaluedHashMap<String, Object>();

@@ -49,6 +49,8 @@ public class AutoloadProcess {
 	
 	static PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 	static Properties property = propertiesRetrieve.getProperties(); 
+	String tenant=EnvironmentSetting.getTenant().toLowerCase();
+	
 	DateType dateType = new DateType();
 	static Long seqNumber;
 	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String electronicId, String sequenceNumber) {
@@ -93,7 +95,7 @@ public class AutoloadProcess {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			InputSource xml = new InputSource(new StringReader(autoloadxml.toString()));
 			
-			System.out.println(autoloadxml.toString());
+			//System.out.println(autoloadxml.toString());
 			Document doc = builder.parse(xml);
 
 			XPathFactory xpathFactory = XPathFactory.newInstance();
@@ -105,10 +107,10 @@ public class AutoloadProcess {
 			
 			NodeList nodeListWTAddValues = (NodeList) addValue.evaluate(doc, XPathConstants.NODESET);
 			autoloadRecordTypeList = getAutoloadRecords(nodeListWTAddValues,electronicId);
-			//XPathExpression addProducts = xPath.compile("//ns2:AddProduct[ns2:ElectronicId='"+electronicId+"']");
-			//NodeList nodeListWTAddProducts = (NodeList) addProducts.evaluate(doc, XPathConstants.NODESET);
+			XPathExpression addProducts = xPath.compile("//ns2:AddProduct[ns2:ElectronicId='"+electronicId+"']");
+			NodeList nodeListWTAddProducts = (NodeList) addProducts.evaluate(doc, XPathConstants.NODESET);
 			
-			//autoloadRecordTypeList.addAll(getAutoloadRecords(nodeListWTAddProducts,electronicId));
+			autoloadRecordTypeList.addAll(getAutoloadRecords(nodeListWTAddProducts,electronicId));
 					
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -145,7 +147,9 @@ public class AutoloadProcess {
 			
 		
 			AutoloadRecordType autoloadRecordType = new AutoloadRecordType();
-			autoloadRecordType.setTerminalNumber(property.getProperty(EnvironmentSetting.getEnv()+".fbxno"));
+			autoloadRecordType.setTerminalNumber(property.getProperty(tenant+"."+EnvironmentSetting.getEnv()+".fbxno"));
+			
+			
 			autoloadRecordType.setElectronicId(electronicId);
 			autoloadRecordType.setTimestamp(dateType);
 			BigInteger sum = BigInteger.valueOf(0);
@@ -191,6 +195,7 @@ public class AutoloadProcess {
 				case "ns2:LoadSequence":
 					autoloadRecordType.setLoadSequence(Byte.parseByte(nNode2.getTextContent()));
 					break;
+					
 				default :
 				}
 

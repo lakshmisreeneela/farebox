@@ -13,7 +13,7 @@ public class RiderShipImpl {
 	public void riderShipProcess(String cardNumber, String sequenceNumber) {
 		PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 		Properties property = propertiesRetrieve.getProperties();
-		
+		String tenant=EnvironmentSetting.getTenant().toLowerCase();
 		ElectronicID electronicID = new ElectronicID();
 		String cardElectronicId=electronicID.getElectronicId(cardNumber);
 		if(cardElectronicId!=null)
@@ -21,12 +21,13 @@ public class RiderShipImpl {
 		
 		
 		DeviceAuthentication deviceAuthentication = new DeviceAuthentication();
-		String serialNumber = property.getProperty(EnvironmentSetting.getEnv()+".fbxno");
-		String password = property.getProperty(EnvironmentSetting.getEnv()+".pwd");
+		String serialNumber = property.getProperty(tenant+"."+EnvironmentSetting.getEnv()+".fbxno");
+		String password = property.getProperty(tenant+"."+EnvironmentSetting.getEnv()+".pwd");
 		DeviceAuthResponse deviceAuthResponse = deviceAuthentication.authenticate(serialNumber, password);
 		if (deviceAuthResponse != null) {
 			RiderShip uploadRecords = new RiderShip();
 			String response = uploadRecords.uploadRecords(deviceAuthResponse,cardElectronicId,sequenceNumber);
+			
 			System.out.println(response);
 
 		}
