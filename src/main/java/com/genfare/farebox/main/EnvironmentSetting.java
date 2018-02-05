@@ -6,7 +6,7 @@ public class EnvironmentSetting {
 	private static String environment = "cdta-intg.gfcp.io";
 	private static String tenant = "CDTA";
 	private static String env = "intg";
-	private static String dateofusage = null;
+	private static String dateofusage;
 	
 	
 	

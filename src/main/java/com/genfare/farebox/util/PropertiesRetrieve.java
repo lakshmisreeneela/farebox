@@ -1,8 +1,6 @@
 package com.genfare.farebox.util;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class PropertiesRetrieve {
@@ -10,19 +8,16 @@ public class PropertiesRetrieve {
 	static Properties prop = new Properties();
 
 	public Properties getProperties() {
-		InputStream input = null;
 		try {
+			 java.net.URL url = ClassLoader.getSystemResource("farebox.properties");
+			 prop.load(url.openStream());
 			
-			 input = new FileInputStream("C:/farebox/device.properties");
-			if (input != null) {
-				prop.load(input);
-			} 
 		} catch (IOException ex) {
-
+			System.out.println("unable to load properties file");
 			ex.printStackTrace();
 		}
 		
-	
+		
 		return prop;
 	}
 }

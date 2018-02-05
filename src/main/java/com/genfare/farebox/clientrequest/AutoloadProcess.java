@@ -40,19 +40,22 @@ import com.genfare.cloud.osgi.device.auth.response.AwsResponse.AwsCredentials;
 import com.genfare.farebox.main.EnvironmentSetting;
 import com.genfare.farebox.main.NamespaceResolver;
 import com.genfare.farebox.util.PropertiesRetrieve;
+import com.genfare.farebox.util.Usage;
 
 public class AutoloadProcess {
 
 	static final String AUTH_HEADER_PROPERTY = "Authorization";
 	InputStream input = null;
 	private Byte pendingCount = 0;
-	
-	static PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
-	static Properties property = propertiesRetrieve.getProperties(); 
+	private Usage usage = new Usage();
+	private PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
+	private Properties property = propertiesRetrieve.getProperties(); 
 	String tenant=EnvironmentSetting.getTenant().toLowerCase();
 	
 	DateType dateType = new DateType();
 	static Long seqNumber;
+	
+	
 	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String electronicId, String sequenceNumber) {
 		seqNumber = Long.parseLong(sequenceNumber);
 		AwsCredentials awsCredentials = deviceAuthResponse.getAws().getCredentials();
@@ -62,15 +65,14 @@ public class AutoloadProcess {
 		byte[] authorizationBytes = (accessKey + " | " + secretKey + " | " + sessionId).getBytes();
 		String awsAuthorizationKey = new String(Base64.encodeBytes(authorizationBytes));
 		String uploadUrlString = "https://"+EnvironmentSetting.getEnvironment()+"/services/device/authenticated/v2/event";
-		RiderShip riderShip = new RiderShip();
-		DeviceEventAPI deviceEventAPI = riderShip.getDeviceHeader();
+		
+		DeviceEventAPI deviceEventAPI = usage.getDeviceHeader();
 		List<AutoloadRecordType> autoloadRecordTypeList  = getAutoloadXML(electronicId);
 		deviceEventAPI.setRecords(new RecordsType());
 		deviceEventAPI.getRecords().setAutoloads(new RecordsType.Autoloads());
 		deviceEventAPI.getRecords().getAutoloads().getAutoload().addAll(autoloadRecordTypeList);
-		String xml = riderShip.makeXml(deviceEventAPI);
-		return riderShip.post(uploadUrlString, awsAuthorizationKey, xml);
-		//return "";
+		String xml = usage.makeXml(deviceEventAPI);
+		return usage.post(uploadUrlString, awsAuthorizationKey, xml);
 
 	}
 
@@ -94,16 +96,12 @@ public class AutoloadProcess {
 			factory.setNamespaceAware(true);
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			InputSource xml = new InputSource(new StringReader(autoloadxml.toString()));
-			
-			//System.out.println(autoloadxml.toString());
 			Document doc = builder.parse(xml);
-
+			
 			XPathFactory xpathFactory = XPathFactory.newInstance();
 			XPath xPath = xpathFactory.newXPath();
 			xPath.setNamespaceContext(new NamespaceResolver(doc));
 			XPathExpression addValue = xPath.compile("//ns2:AddValue[ns2:ElectronicId='"+electronicId+"']");
-			
-			
 			
 			NodeList nodeListWTAddValues = (NodeList) addValue.evaluate(doc, XPathConstants.NODESET);
 			autoloadRecordTypeList = getAutoloadRecords(nodeListWTAddValues,electronicId);
@@ -131,31 +129,29 @@ public class AutoloadProcess {
 		if(EnvironmentSetting.getDateofusage() == null)
 		{
 			Date date=new Date(); 
-			 xMLGregorianCalendar = RiderShip.getXMLGregorianCalendar(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(date));
+			 xMLGregorianCalendar = usage.getXMLGregorianCalendar(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
 		
 	    }else
 	     {
-	    	 xMLGregorianCalendar = RiderShip.getXMLGregorianCalendar(EnvironmentSetting.getDateofusage());
+	    	 xMLGregorianCalendar = usage.getXMLGregorianCalendar(EnvironmentSetting.getDateofusage());
 	     }
 		List<AutoloadRecordType> autoloadRecordTypeList = new ArrayList<AutoloadRecordType>();
 		dateType.setLocalTime(false);
 		dateType.setValue(xMLGregorianCalendar);
 		
 		for (int i = 0; i < nodeList.getLength(); i++) {
+			
 			Node nNode = nodeList.item(i);
 			NodeList childNodes = nNode.getChildNodes();
 			
-		
 			AutoloadRecordType autoloadRecordType = new AutoloadRecordType();
 			autoloadRecordType.setTerminalNumber(property.getProperty(tenant+"."+EnvironmentSetting.getEnv()+".fbxno"));
-			
 			
 			autoloadRecordType.setElectronicId(electronicId);
 			autoloadRecordType.setTimestamp(dateType);
 			BigInteger sum = BigInteger.valueOf(0);
 			sum = sum.add(BigInteger.valueOf(seqNumber));
 			seqNumber++;
-
 			autoloadRecordType.setSequenceNumber(sum);
 			autoloadRecordType.setStatus("SUCCESS");
 			autoloadRecordType.setReasonCode("SUCCESS");
@@ -163,15 +159,9 @@ public class AutoloadProcess {
 			autoloadRecordType.setPendingCount(pendingCount);
 			pendingCount++;
 			
-			
-			//NodeList ticketChildNodes = childNodes.item(8).getChildNodes();
-			//autoloadRecordType.setTicketId(Integer.parseInt(ticketChildNodes.item(0).getTextContent()));
-			
-
 			for (int j = 0; j < childNodes.getLength(); j++) {
 				Node nNode2 = childNodes.item(j);
 
-				System.out.println(nNode2.getNodeName() + ":" + nNode2.getTextContent());
 				switch (nNode2.getNodeName()) {
 				case "ns2:AutoloadType":
 					autoloadRecordType.setAutoloadType(nNode2.getTextContent());

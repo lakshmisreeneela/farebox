@@ -22,13 +22,10 @@ import com.genfare.farebox.util.PropertiesRetrieve;
 public class BasicOptions {
 	
 	
-	static PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
-	
-	
-	static Properties property = propertiesRetrieve.getProperties(); 
+	 PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
+	 Properties property = propertiesRetrieve.getProperties(); 
 
 	
-	//private static final Logger log = Logger.getLogger(BasicOptions.class.getName());
 	public static ArrayList<String> commands = new ArrayList<String>();
 
 	public static void main(String[] args) {
@@ -158,7 +155,8 @@ public class BasicOptions {
 			arguments = line.getOptionValues("set");
 			if (isValidate3(arguments)) {
 				switch (arguments[0]) {
-				case "env":
+				case "env": PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
+				 Properties property = propertiesRetrieve.getProperties(); 
 					String environment = property.toString();
 					if (environment.contains(arguments[1] + "." + arguments[2])) {
 						EnvironmentSetting.setTenant(arguments[1]);
@@ -166,6 +164,8 @@ public class BasicOptions {
 					} else {
 						System.out.println("environment doesn't exist");
 					}
+					break;
+					default:System.out.println("not a valid option: "+arguments[0]);
 				}
 			} else {
 				System.out.println("must have option(env) and two arguments <tenant> <environment>");
