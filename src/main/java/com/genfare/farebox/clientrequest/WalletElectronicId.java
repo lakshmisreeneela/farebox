@@ -6,21 +6,17 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import com.amazonaws.util.json.JSONObject;
+import org.json.JSONObject;
+
 import com.genfare.farebox.main.EnvironmentSetting;
 
 public class WalletElectronicId {
 	public static final String AUTH_HEADER_PROPERTY = "Authorization";
 	JSONObject json = null;
 	public JSONObject getElectronicId(String auth_token, String tokenType, String cardNumber) {
-		String environment = EnvironmentSetting.getEnvironment();
-		int index = environment.indexOf('-');
-		if(index != -1)
-		{
-		environment = environment.substring(index+1);
-		}
+		String env = EnvironmentSetting.getEnv();
 		
-		String uploadURL = "https://api."+environment+"/services/data-api/v1/wallets/types/smart_card/identifiers/"+cardNumber+"?tenant=CDTA";
+		String uploadURL = "https://api."+env+".gfcp.io/services/data-api/v1/wallets/types/smart_card/identifiers/"+cardNumber+"?tenant=CDTA";
 		String authorizationHeader = tokenType + " " + auth_token;
 		Client client = ClientBuilder.newClient();
 		try {
@@ -31,11 +27,7 @@ public class WalletElectronicId {
 			Response response = client.target(uploadURL).request().headers(head).get();
 			if (response.getStatus() == 200) {
 				String responseAsString = response.readEntity(String.class);
-				json = new JSONObject(responseAsString);
-//				if(json != null)
-//				{
-//					
-//				}
+				json = new JSONObject(responseAsString);			
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();

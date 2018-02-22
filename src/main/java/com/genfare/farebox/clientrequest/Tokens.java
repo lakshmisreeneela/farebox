@@ -8,8 +8,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
 
-import com.amazonaws.util.json.JSONObject;
 import com.genfare.farebox.main.EnvironmentSetting;
 import com.genfare.farebox.util.PropertiesRetrieve;
 import javax.ws.rs.client.Client;

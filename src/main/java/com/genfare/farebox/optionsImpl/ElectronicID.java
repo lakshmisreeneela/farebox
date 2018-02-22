@@ -1,8 +1,10 @@
 package com.genfare.farebox.optionsImpl;
 
-import com.amazonaws.util.json.JSONArray;
-import com.amazonaws.util.json.JSONException;
-import com.amazonaws.util.json.JSONObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.genfare.farebox.clientrequest.Tokens;
 import com.genfare.farebox.clientrequest.WalletElectronicId;
 
@@ -30,7 +32,22 @@ public String getElectronicId(String cardNumber)
 					 break;
 				 }
 			 }
+			 
+			 
 			System.out.println("Card Electronic_Id : "+electronicid);
+			JSONArray products =  jSONObject.getJSONArray("contents");
+			System.out.println("PRODUCTS");
+			for (int i = 0; i < products.length(); i++)
+			{
+				
+				
+				JSONObject product = jSONArray.getJSONObject(i);
+				System.out.println("Product-"+i);
+				System.out.println("Type : "+product.get("type"));
+				System.out.println("Description : "+product.get("description"));
+				System.out.println("Balance : "+product.get("balance"));
+			}
+			
 			
 		} 
 		}catch (JSONException e) {

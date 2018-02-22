@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import org.jboss.resteasy.util.Base64;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.genfare.cloud.device.common.DateType;
 import com.genfare.cloud.device.record.DeviceEventAPI;
@@ -32,7 +34,7 @@ public class RiderShip {
 	
 	
 	
-	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String electronicId, String sequenceNumber) {
+	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String cardNumber,String electronicId,String amount, String sequenceNumber) {
 
 		AwsCredentials awsCredentials = deviceAuthResponse.getAws().getCredentials();
 		String accessKey = awsCredentials.getAccessKey();
@@ -43,7 +45,7 @@ public class RiderShip {
 		String uploadUrlString = "https://"+EnvironmentSetting.getEnvironment()+"/services/device/authenticated/v2/event";
 		Usage usage = new Usage();
 		DeviceEventAPI deviceEventAPI =usage.getDeviceHeader();
-		deviceEventAPI = getUsageRecords(deviceEventAPI,electronicId,sequenceNumber);
+		deviceEventAPI = getUsageRecords(deviceEventAPI,cardNumber,electronicId,amount,sequenceNumber);
 		
 		String xml = usage.makeXml(deviceEventAPI);
 		return usage.post(uploadUrlString, awsAuthorizationKey, xml);
@@ -53,11 +55,11 @@ public class RiderShip {
 
 	
 	
-	private DeviceEventAPI getUsageRecords(DeviceEventAPI deviceEventAPI, String electronicId, String sequenceNumber) {
+	private DeviceEventAPI getUsageRecords(DeviceEventAPI deviceEventAPI,String cardNumber, String electronicId,String amount, String sequenceNumber) {
 		
 		ArrayList<UsageRecordType> usageRecordTypes = new ArrayList<UsageRecordType>();
 		DateType dateType = deviceEventAPI.getHeader().getDateSent();
-		UsageRecordType usageRecordType = prepareUsageRecord(electronicId,dateType);
+		UsageRecordType usageRecordType = prepareUsageRecord(cardNumber,electronicId,amount,dateType);
 		
 		
 		BigInteger sum = BigInteger.valueOf(0);
@@ -73,15 +75,19 @@ public class RiderShip {
 
 
 
-	private UsageRecordType prepareUsageRecord(String electronicId, DateType dateType) {
+	private UsageRecordType prepareUsageRecord(String cardNumber,String electronicId,String amount, DateType dateType) {
 		
 		UsageRecordType usageRecordType = new UsageRecordType();
+		
+		WalletContents walletContents = new WalletContents();
+		JSONObject  jSONObject = walletContents.getWalletContents(cardNumber);
+		addRequiredFields(usageRecordType,jSONObject,amount);
+		
+		
 		usageRecordType.setTerminalNumber(fbxNo);
-		usageRecordType.setTimestamp(new DateType());
+		usageRecordType.setTimestamp(dateType);
 		usageRecordType.setTerminalType(property.getProperty("deviceType"));
-		usageRecordType.setDesignator(Integer.parseInt(property.getProperty("Designator")));
 		usageRecordType.setRouteId(Integer.parseInt(property.getProperty("RouteId")));
-		usageRecordType.setGroup((byte) Integer.parseInt(property.getProperty("Group")));
 		usageRecordType.setOperatorId(Integer.parseInt(property.getProperty("OperatorId")));
 		usageRecordType.setAmountCharged(new BigDecimal(0.00));
 		usageRecordType.setAmountRemaining(new BigDecimal(0.00));
@@ -93,13 +99,67 @@ public class RiderShip {
 		usageRecordType.setLongitude("0.0000");
 		usageRecordType.setPaymenttype("EXISTING_FARECARD");
 		usageRecordType.setFareset(Integer.parseInt(property.getProperty("fareset")));
-		usageRecordType.setTTP(62);
-
+		
 		usageRecordType.setDateOfUsage(dateType);
 		usageRecordType.setTimestamp(dateType);
+		
+		
 		return usageRecordType;
 	}
 
+
+
+
+	
+	private UsageRecordType addRequiredFields(UsageRecordType usageRecordType, JSONObject jSONObject, String amount) {
+
+		JSONArray products = jSONObject.getJSONArray("content");
+
+		int designator = 0;
+		byte group = 0;
+		int ttp = 0;
+		byte slot = 0;
+		BigDecimal balance;
+
+		for (int i = 0; i < products.length(); i++) {
+			JSONObject product = products.getJSONObject(i);
+			balance = (BigDecimal) product.get("balance");
+
+			if ((product.get("type").equals("stored_value") || product.get("type").equals("period_pass")
+					|| product.get("type").equals("stored_ride"))) {
+
+				designator = product.getInt("designator");
+				group = (byte) product.getInt("group");
+				ttp = product.getInt("ttp");
+				slot = (byte) product.getInt("slot");
+				validateBalance(amount, balance);
+				break;
+			}
+			
+			usageRecordType.setDesignator(designator);
+			usageRecordType.setGroup(group);
+			usageRecordType.setTTP(ttp);
+			usageRecordType.setSlot(slot);
+		}
+		return usageRecordType;
+
+	}
+
+
+
+
+	private void validateBalance(String amount, BigDecimal balance) {
+		String amountToBeCharged;
+		String ramainingAmount;
+		
+		if(new BigDecimal(amount) <=balance)
+		{
+			
+		}
+		
+		
+		
+	}
 
 
 }

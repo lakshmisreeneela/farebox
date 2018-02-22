@@ -10,7 +10,7 @@ import com.genfare.farebox.util.PropertiesRetrieve;
 
 public class RiderShipImpl { 
 
-	public void riderShipProcess(String cardNumber, String sequenceNumber) {
+	public void riderShipProcess(String cardNumber,String ammount, String sequenceNumber) {
 		PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 		Properties property = propertiesRetrieve.getProperties();
 		String tenant=EnvironmentSetting.getTenant().toLowerCase();
@@ -26,7 +26,7 @@ public class RiderShipImpl {
 		DeviceAuthResponse deviceAuthResponse = deviceAuthentication.authenticate(serialNumber, password);
 		if (deviceAuthResponse != null) {
 			RiderShip uploadRecords = new RiderShip();
-			String response = uploadRecords.uploadRecords(deviceAuthResponse,cardElectronicId,sequenceNumber);
+			String response = uploadRecords.uploadRecords(deviceAuthResponse,cardNumber,cardElectronicId,ammount,sequenceNumber);
 			
 			System.out.println(response);
 

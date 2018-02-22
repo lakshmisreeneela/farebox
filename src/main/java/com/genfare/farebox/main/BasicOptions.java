@@ -31,7 +31,7 @@ public class BasicOptions {
 	public static void main(String[] args) {
 		Options options = new Options();
 
-		OptionBuilder.withArgName("electronicId sequencenumber");
+		OptionBuilder.withArgName("electronicId amount sequencenumber");
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("start ridership");
@@ -179,19 +179,23 @@ public class BasicOptions {
 		
 		case "-tap":
 			arguments = line.getOptionValues("tap");
-			if (isValidate2(arguments)) {
+			if (isValidate3(arguments)) {
 				RiderShipImpl riderShip = new RiderShipImpl();
-				riderShip.riderShipProcess(arguments[0], arguments[1]);
+				riderShip.riderShipProcess(arguments[0],arguments[1], arguments[2]);
 
 			} else {
 				System.out.println("must have two arguments(CardNumber and SequenceNumber)");
 			}
 			break;
 		
+		
+		
 		case "-devicelog":
 			System.out.println("serialNumber :" + EnvironmentSetting.getFbSerialNumber());
 			System.out.println("assetPassword :" + EnvironmentSetting.getFbPassword());
 			break;
+		
+		
 		
 		case "-environment":
 			System.out.println("Environment :" + EnvironmentSetting.getEnvironment());
@@ -199,6 +203,8 @@ public class BasicOptions {
 			System.out.println("env :" + EnvironmentSetting.getEnv());
 			break;
 
+		
+		
 		case "-help":
 			arguments = line.getOptionValues("help");
 			if (arguments.length == 1) {
