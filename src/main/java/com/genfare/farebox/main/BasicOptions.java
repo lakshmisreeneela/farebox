@@ -14,7 +14,7 @@ import org.apache.commons.cli.Options;
 
 import com.genfare.farebox.optionsImpl.AutoloadOptImpl;
 import com.genfare.farebox.optionsImpl.DeviceAuthOptImpl;
-import com.genfare.farebox.optionsImpl.ElectronicID;
+import com.genfare.farebox.optionsImpl.WalletDetailsImpl;
 import com.genfare.farebox.optionsImpl.RiderShipImpl;
 import com.genfare.farebox.util.ListOptions;
 import com.genfare.farebox.util.PropertiesRetrieve;
@@ -31,8 +31,8 @@ public class BasicOptions {
 	public static void main(String[] args) {
 		Options options = new Options();
 
-		OptionBuilder.withArgName("electronicId amount sequencenumber");
-		OptionBuilder.hasArgs(2);
+		OptionBuilder.withArgName("cardNumber identifier amount sequencenumber");
+		OptionBuilder.hasArgs(4);
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("start ridership");
 		Option property2 = OptionBuilder.create("tap");
@@ -53,7 +53,7 @@ public class BasicOptions {
 		Option property3 = OptionBuilder.create("set");
 		options.addOption(property3);
 
-		OptionBuilder.withArgName("eid cardNumber");
+		OptionBuilder.withArgName("carddetails cardNumber");
 		OptionBuilder.hasArgs(2);
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("getting electronic_Id of the card");
@@ -136,10 +136,10 @@ public class BasicOptions {
 			arguments = line.getOptionValues("get");
 			switch (arguments[0]) {
 			
-			case "eid":
+			case "carddetails":
 				if (isValidate2(arguments)) {
-					ElectronicID electronicID = new ElectronicID();
-					electronicID.getElectronicId(arguments[1]);
+					WalletDetailsImpl electronicID = new WalletDetailsImpl();
+					electronicID.getWalletDetails(arguments[1]);
 
 				} else {
 					System.out.println("must have a option and one argument");
@@ -179,9 +179,9 @@ public class BasicOptions {
 		
 		case "-tap":
 			arguments = line.getOptionValues("tap");
-			if (isValidate3(arguments)) {
+			if (isValidate4(arguments)) {
 				RiderShipImpl riderShip = new RiderShipImpl();
-				riderShip.riderShipProcess(arguments[0],arguments[1], arguments[2]);
+				riderShip.riderShipProcess(arguments[0],arguments[1], arguments[2],arguments[3]);
 
 			} else {
 				System.out.println("must have two arguments(CardNumber and SequenceNumber)");
@@ -229,6 +229,12 @@ public class BasicOptions {
 
 	public static boolean isValidate2(String[] arguments) {
 		if (arguments.length < 2) {
+			return false;
+		}
+		return true;
+	}
+	public static boolean isValidate4(String[] arguments) {
+		if (arguments.length < 4) {
 			return false;
 		}
 		return true;

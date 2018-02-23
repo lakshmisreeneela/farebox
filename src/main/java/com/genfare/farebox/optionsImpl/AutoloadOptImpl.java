@@ -5,6 +5,7 @@ import java.util.Properties;
 import com.genfare.cloud.osgi.device.auth.response.DeviceAuthResponse;
 import com.genfare.farebox.clientrequest.AutoloadProcess;
 import com.genfare.farebox.clientrequest.DeviceAuthentication;
+import com.genfare.farebox.clientrequest.WalletElectronicId;
 import com.genfare.farebox.main.EnvironmentSetting;
 import com.genfare.farebox.util.PropertiesRetrieve;
 
@@ -14,8 +15,8 @@ public class AutoloadOptImpl {
 		PropertiesRetrieve propertiesRetrieve = new PropertiesRetrieve();
 		Properties property = propertiesRetrieve.getProperties(); 
 		String tenant=EnvironmentSetting.getTenant().toLowerCase();
-		ElectronicID electronicID = new ElectronicID();
-		String cardElectronicId=electronicID.getElectronicId(cardNumber);
+		WalletElectronicId walletElectronicId = new WalletElectronicId();
+		String cardElectronicId=walletElectronicId.getElectronicId(cardNumber);
 		if(cardElectronicId!=null)
 		{
 		DeviceAuthentication deviceAuthentication = new DeviceAuthentication();

@@ -31,11 +31,12 @@ public class RiderShip {
 	String tenant=EnvironmentSetting.getTenant().toLowerCase();
 	DateType dateType = new DateType();
 	String fbxNo = property.getProperty(tenant+"."+EnvironmentSetting.getEnv()+".fbxno");
+	private String identifier = "";
 	
 	
-	
-	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String cardNumber,String electronicId,String amount, String sequenceNumber) {
-
+	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String cardNumber,String electronicId,String identifier,String amount, String sequenceNumber) {
+		this.identifier = identifier;
+		int amountTOBeCharge = Integer.parseInt(amount);
 		AwsCredentials awsCredentials = deviceAuthResponse.getAws().getCredentials();
 		String accessKey = awsCredentials.getAccessKey();
 		String secretKey = awsCredentials.getSecretKey();
@@ -45,23 +46,27 @@ public class RiderShip {
 		String uploadUrlString = "https://"+EnvironmentSetting.getEnvironment()+"/services/device/authenticated/v2/event";
 		Usage usage = new Usage();
 		DeviceEventAPI deviceEventAPI =usage.getDeviceHeader();
-		deviceEventAPI = getUsageRecords(deviceEventAPI,cardNumber,electronicId,amount,sequenceNumber);
-		
+		deviceEventAPI = getUsageRecords(deviceEventAPI,cardNumber,electronicId,amountTOBeCharge,sequenceNumber);
+		if(deviceEventAPI != null)
+		{
 		String xml = usage.makeXml(deviceEventAPI);
 		return usage.post(uploadUrlString, awsAuthorizationKey, xml);
+		}
+		return null;
 
 	}
 
 
 	
 	
-	private DeviceEventAPI getUsageRecords(DeviceEventAPI deviceEventAPI,String cardNumber, String electronicId,String amount, String sequenceNumber) {
+	private DeviceEventAPI getUsageRecords(DeviceEventAPI deviceEventAPI,String cardNumber, String electronicId,int amount, String sequenceNumber) {
 		
 		ArrayList<UsageRecordType> usageRecordTypes = new ArrayList<UsageRecordType>();
 		DateType dateType = deviceEventAPI.getHeader().getDateSent();
 		UsageRecordType usageRecordType = prepareUsageRecord(cardNumber,electronicId,amount,dateType);
 		
-		
+		if(usageRecordType != null)
+		{
 		BigInteger sum = BigInteger.valueOf(0);
 		sum = sum.add(BigInteger.valueOf(Long.parseLong(sequenceNumber)));
 		usageRecordType.setSequenceNumber(sum);
@@ -70,20 +75,24 @@ public class RiderShip {
 		deviceEventAPI.getRecords().setUsages(new RecordsType.Usages());
 		deviceEventAPI.getRecords().getUsages().getUsage().add(usageRecordType);
 		return deviceEventAPI;
+		}
+		
+		return null;
 		
 }
 
 
 
-	private UsageRecordType prepareUsageRecord(String cardNumber,String electronicId,String amount, DateType dateType) {
+	private UsageRecordType prepareUsageRecord(String cardNumber,String electronicId,int amount, DateType dateType) {
 		
 		UsageRecordType usageRecordType = new UsageRecordType();
 		
 		WalletContents walletContents = new WalletContents();
-		JSONObject  jSONObject = walletContents.getWalletContents(cardNumber);
-		addRequiredFields(usageRecordType,jSONObject,amount);
+		JSONArray jSONArray = walletContents.getWalletContents(cardNumber);
+		usageRecordType = addRequiredFields(usageRecordType,jSONArray,amount);
 		
-		
+		if(usageRecordType!= null)
+		{
 		usageRecordType.setTerminalNumber(fbxNo);
 		usageRecordType.setTimestamp(dateType);
 		usageRecordType.setTerminalType(property.getProperty("deviceType"));
@@ -102,6 +111,7 @@ public class RiderShip {
 		
 		usageRecordType.setDateOfUsage(dateType);
 		usageRecordType.setTimestamp(dateType);
+		}
 		
 		
 		return usageRecordType;
@@ -111,56 +121,36 @@ public class RiderShip {
 
 
 	
-	private UsageRecordType addRequiredFields(UsageRecordType usageRecordType, JSONObject jSONObject, String amount) {
-
-		JSONArray products = jSONObject.getJSONArray("content");
-
-		int designator = 0;
-		byte group = 0;
-		int ttp = 0;
-		byte slot = 0;
-		BigDecimal balance;
-
+	private UsageRecordType addRequiredFields(UsageRecordType usageRecordType, JSONArray products, int amount) {
+		boolean productFound = false;
+	
 		for (int i = 0; i < products.length(); i++) {
 			JSONObject product = products.getJSONObject(i);
-			balance = (BigDecimal) product.get("balance");
-
-			if ((product.get("type").equals("stored_value") || product.get("type").equals("period_pass")
-					|| product.get("type").equals("stored_ride"))) {
-
-				designator = product.getInt("designator");
-				group = (byte) product.getInt("group");
-				ttp = product.getInt("ttp");
-				slot = (byte) product.getInt("slot");
-				validateBalance(amount, balance);
+			BigDecimal balance = new BigDecimal(((String)product.get("balance")));
+			int bal = balance.toBigInteger().intValueExact();
+			
+			if (product.get("identifier").equals(identifier)&&(amount<=bal)) {
+				productFound = true;
+				usageRecordType.setDesignator(product.getInt("designator"));
+				Integer group = (Integer)product.get("group");
+				usageRecordType.setGroup(group.byteValue());
+				usageRecordType.setTTP(product.getInt("ttp"));
+				Integer slot = (Integer)product.get("slot");
+				usageRecordType.setSlot(slot.byteValue());
+				usageRecordType.setAmountCharged(new BigDecimal(amount));
+				usageRecordType.setAmountRemaining(new BigDecimal(bal -amount));
 				break;
 			}
 			
-			usageRecordType.setDesignator(designator);
-			usageRecordType.setGroup(group);
-			usageRecordType.setTTP(ttp);
-			usageRecordType.setSlot(slot);
-		}
-		return usageRecordType;
-
-	}
-
-
-
-
-	private void validateBalance(String amount, BigDecimal balance) {
-		String amountToBeCharged;
-		String ramainingAmount;
-		
-		if(new BigDecimal(amount) <=balance)
+			}
+		if(productFound==false)
 		{
-			
+			System.out.println("Don't have enough balance in the product");
+			return null;
 		}
-		
-		
-		
-	}
 
+		return usageRecordType;
+	}
 
 }
 
