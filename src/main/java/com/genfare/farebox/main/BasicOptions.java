@@ -67,6 +67,18 @@ public class BasicOptions {
 		Option property7 = OptionBuilder.create("autoload");
 		options.addOption(property7);
 		
+		
+		OptionBuilder.withArgName("cardNumber sequencenumber");
+		OptionBuilder.hasArgs(4);
+		OptionBuilder.withValueSeparator(' ');
+		OptionBuilder.withDescription("start ridership");
+		Option property8 = OptionBuilder.create("ride");
+		options.addOption(property8);
+		
+		
+		
+		
+		
 		System.out.println("Usage : <command> <option> <arguments..>");
 		System.out.println("example list");
 		for (;;) {
@@ -184,9 +196,21 @@ public class BasicOptions {
 				riderShip.riderShipProcess(arguments[0],arguments[1], arguments[2],arguments[3]);
 
 			} else {
+				System.out.println("must have four arguments(CardNumber and SequenceNumber)");
+			}
+			break;
+			
+		case "-ride":
+			arguments = line.getOptionValues("ride");
+			if (isValidate2(arguments)) {
+				RiderShipImpl riderShip = new RiderShipImpl();
+				riderShip.riderShipProcess(arguments[0],null,null,arguments[1]);
+
+			} else {
 				System.out.println("must have two arguments(CardNumber and SequenceNumber)");
 			}
 			break;
+		
 		
 		
 		

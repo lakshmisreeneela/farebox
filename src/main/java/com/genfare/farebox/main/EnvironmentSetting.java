@@ -7,6 +7,7 @@ public class EnvironmentSetting {
 	private static String tenant = "CDTA";
 	private static String env = "intg";
 	private static String dateofusage;
+
 	
 	
 	
@@ -31,6 +32,7 @@ public class EnvironmentSetting {
 	public static String getTenant() {
 		return tenant;
 	}
+
 	public static void setTenant(String tenant) {
 		EnvironmentSetting.tenant = tenant.toUpperCase();
 	}

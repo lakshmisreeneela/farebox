@@ -31,12 +31,15 @@ public class RiderShip {
 	String tenant=EnvironmentSetting.getTenant().toLowerCase();
 	DateType dateType = new DateType();
 	String fbxNo = property.getProperty(tenant+"."+EnvironmentSetting.getEnv()+".fbxno");
-	private String identifier = "";
-	
+	private String identifier = null;
+	int amountTOBeCharge;
 	
 	public String uploadRecords(DeviceAuthResponse deviceAuthResponse,String cardNumber,String electronicId,String identifier,String amount, String sequenceNumber) {
+		if(identifier!=null&& amount != null)
+		{
 		this.identifier = identifier;
-		int amountTOBeCharge = Integer.parseInt(amount);
+		 amountTOBeCharge = Integer.parseInt(amount);
+		}
 		AwsCredentials awsCredentials = deviceAuthResponse.getAws().getCredentials();
 		String accessKey = awsCredentials.getAccessKey();
 		String secretKey = awsCredentials.getSecretKey();
@@ -83,40 +86,42 @@ public class RiderShip {
 
 
 
-	private UsageRecordType prepareUsageRecord(String cardNumber,String electronicId,int amount, DateType dateType) {
-		
+	private UsageRecordType prepareUsageRecord(String cardNumber, String electronicId, int amount, DateType dateType) {
+
 		UsageRecordType usageRecordType = new UsageRecordType();
-		
+
 		WalletContents walletContents = new WalletContents();
 		JSONArray jSONArray = walletContents.getWalletContents(cardNumber);
-		usageRecordType = addRequiredFields(usageRecordType,jSONArray,amount);
-		
-		if(usageRecordType!= null)
-		{
-		usageRecordType.setTerminalNumber(fbxNo);
-		usageRecordType.setTimestamp(dateType);
-		usageRecordType.setTerminalType(property.getProperty("deviceType"));
-		usageRecordType.setRouteId(Integer.parseInt(property.getProperty("RouteId")));
-		usageRecordType.setOperatorId(Integer.parseInt(property.getProperty("OperatorId")));
-		usageRecordType.setAmountCharged(new BigDecimal(0.00));
-		usageRecordType.setAmountRemaining(new BigDecimal(0.00));
+		if (identifier == null) {
+			usageRecordType.setDesignator(Integer.parseInt(property.getProperty("Designator")));
+			usageRecordType.setGroup((byte) Integer.parseInt(property.getProperty("Group")));
+			usageRecordType.setAmountCharged(new BigDecimal(0.00));
+			usageRecordType.setAmountRemaining(new BigDecimal(0.00));
+			usageRecordType.setTTP(62);
 
-		usageRecordType.setElectronicId(electronicId);
-		usageRecordType.setPendingCount(0);
-		usageRecordType.setPayGoType(0);
-		usageRecordType.setLatitude("0.0000");
-		usageRecordType.setLongitude("0.0000");
-		usageRecordType.setPaymenttype("EXISTING_FARECARD");
-		usageRecordType.setFareset(Integer.parseInt(property.getProperty("fareset")));
-		
-		usageRecordType.setDateOfUsage(dateType);
-		usageRecordType.setTimestamp(dateType);
+		} else
+			usageRecordType = addRequiredFields(usageRecordType, jSONArray, amount);
+		if (usageRecordType != null) {
+			usageRecordType.setTerminalNumber(fbxNo);
+			usageRecordType.setTimestamp(dateType);
+			usageRecordType.setTerminalType(property.getProperty("deviceType"));
+			usageRecordType.setRouteId(Integer.parseInt(property.getProperty("RouteId")));
+			usageRecordType.setOperatorId(Integer.parseInt(property.getProperty("OperatorId")));
+
+			usageRecordType.setElectronicId(electronicId);
+			usageRecordType.setPendingCount(0);
+			usageRecordType.setPayGoType(0);
+			usageRecordType.setLatitude("0.0000");
+			usageRecordType.setLongitude("0.0000");
+			usageRecordType.setPaymenttype("EXISTING_FARECARD");
+			usageRecordType.setFareset(Integer.parseInt(property.getProperty("fareset")));
+
+			usageRecordType.setDateOfUsage(dateType);
+			usageRecordType.setTimestamp(dateType);
 		}
-		
-		
+
 		return usageRecordType;
 	}
-
 
 
 
